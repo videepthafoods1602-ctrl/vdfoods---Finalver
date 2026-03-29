@@ -20,7 +20,7 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-c+tya5^h$(p40^c5(qtf-ljf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=True)
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = ['videepthamdfoods.com', '187.77.186.154', 'localhost', '127.0.0.1']
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -187,7 +187,16 @@ if not DEBUG:
     SECURE_HSTS_INCLUDE_SUBDOMAINS = True
     SECURE_CONTENT_TYPE_NOSNIFF = True
     CORS_ALLOW_ALL_ORIGINS = False
-    CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=['http://localhost:5176', 'http://localhost:5177', 'http://localhost:5178'])
+    CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
+        'https://videepthamdfoods.com',
+        'http://videepthamdfoods.com',
+        'http://localhost:5173',
+        'http://localhost:8000'
+    ])
+    CSRF_TRUSTED_ORIGINS = [
+        'https://videepthamdfoods.com',
+        'http://videepthamdfoods.com'
+    ]
 
 # Internationalization
 LANGUAGE_CODE = 'en-us'
@@ -197,7 +206,7 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 MEDIA_URL = '/media/'
-MEDIA_ROOT = Path('d:/Veediptha_Foods/shared_media')
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 
 DEFAULT_AUTO_FIELD = 'django_mongodb_backend.fields.ObjectIdAutoField'
 SILENCED_SYSTEM_CHECKS = ['mongodb.E001']

@@ -1,0 +1,66 @@
+version: '3.8'
+
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb_db
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=${MONGO_INITDB_ROOT_USERNAME:-admin}
+      - MONGO_INITDB_ROOT_PASSWORD=${MONGO_INITDB_ROOT_PASSWORD:-S_99_chi_231999}
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  backend:
+    build:
+      context: ./Veediptha_Website-backend
+      dockerfile: Dockerfile
+    container_name: vdfoods_backend
+    restart: always
+    command: gunicorn --bind 0.0.0.0:8000 core.wsgi:application
+    volumes:
+      - ./Veediptha_Website-backend:/app
+      - shared_media:/app/media
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=${DEBUG:-0}
+      - MONGODB_URI=mongodb://${MONGO_INITDB_ROOT_USERNAME:-admin}:${MONGO_INITDB_ROOT_PASSWORD:-S_99_chi_231999}@mongodb:27017/
+      - MONGODB_DB=ecommerce_db
+      - SECRET_KEY=${SECRET_KEY:-django-insecure-c+tya5^h$(p40^c5(qtf-ljfh#!ei6xa@+uc#3fptg98vr-*p6}
+    depends_on:
+      - mongodb
+
+  frontend:
+    build:
+      context: ./website-frontend
+      dockerfile: Dockerfile
+      args:
+        - VITE_API_BASE=https://videepthamdfoods.com
+    container_name: vdfoods_frontend
+    restart: always
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - certbot_var:/var/lib/letsencrypt
+      - shared_media:/app/media
+    depends_on:
+      - backend
+
+  certbot:
+    image: certbot/certbot
+    container_name: certbot
+    volumes:
+      - certbot_etc:/etc/letsencrypt
+      - certbot_var:/var/lib/letsencrypt
+    command: certonly --webroot --webroot-path=/var/lib/letsencrypt --email videepthafoods1602@gmail.com --agree-tos --no-eff-email -d videepthamdfoods.com
+
+volumes:
+  mongo_data:
+  shared_media:
+  certbot_etc:
+  certbot_var:
