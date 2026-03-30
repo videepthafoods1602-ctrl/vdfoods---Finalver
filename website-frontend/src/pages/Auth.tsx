@@ -631,7 +631,7 @@ export default function Auth({ mode = 'login', isModal = false }: { mode?: 'logi
                             </button>
                         </div>
 
-                        <div className="p-10 flex-1 flex flex-col bg-transparent relative z-10">
+                        <div className="p-6 sm:p-10 flex-1 flex flex-col bg-transparent relative z-10">
 
                             {/* Title */}
                             <div className="text-center mb-10">

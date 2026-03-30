@@ -72,7 +72,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             const refreshToken = localStorage.getItem('refresh_token');
             if (refreshToken) {
                 try {
-                    const { data } = await axios.post(`${API}/token/refresh/`, { refresh: refreshToken });
+                    const { data } = await axios.post(`${API}/token/refresh/`, { refresh_token: refreshToken });
                     localStorage.setItem('access_token', data.access_token);
                     if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
                     setAuthHeaders(data.access_token);
@@ -123,7 +123,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     try {
                         const refreshToken = localStorage.getItem('refresh_token');
                         if (refreshToken) {
-                            const { data } = await axios.post(`${API}/token/refresh/`, { refresh: refreshToken });
+                            const { data } = await axios.post(`${API}/token/refresh/`, { refresh_token: refreshToken });
                             localStorage.setItem('access_token', data.access_token);
                             if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
                             setAuthHeaders(data.access_token);

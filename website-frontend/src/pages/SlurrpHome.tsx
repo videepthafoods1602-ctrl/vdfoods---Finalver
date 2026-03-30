@@ -118,7 +118,7 @@ const SlurrpHome = () => {
             <Menu className="w-6 h-6" />
           </button>
           <div className="hidden md:flex gap-6 font-bold text-[#121212]">
-            <Link to="#" className="text-[#C32025]">Shop</Link>
+            <Link to="/categories" className="text-[#C32025]">Shop</Link>
             <Link to="#" className="hover:text-[#C32025] transition-colors">Our Story</Link>
             <Link to="#" className="hover:text-[#C32025] transition-colors">Recipes</Link>
           </div>
@@ -162,9 +162,11 @@ const SlurrpHome = () => {
               <p className="text-xl md:text-3xl text-white/90 font-bold mb-8 max-w-lg">
                 {slide.subtitle}
               </p>
-              <button className="bg-[#C32025] text-white font-black text-xl px-10 py-5 rounded-full w-max hover:scale-105 hover:shadow-xl transition-all shadow-lg transform rotate-1">
-                SHOP NOW
-              </button>
+              <Link to="/categories">
+                <button className="bg-[#C32025] text-white font-black text-xl px-10 py-5 rounded-full w-max hover:scale-105 hover:shadow-xl transition-all shadow-lg transform rotate-1">
+                  SHOP NOW
+                </button>
+              </Link>
             </div>
             <div className="w-full md:w-1/2 h-full absolute md:relative inset-0 opacity-40 md:opacity-100">
               <img 

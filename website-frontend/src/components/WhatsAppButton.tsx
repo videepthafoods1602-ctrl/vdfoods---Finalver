@@ -2,7 +2,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 
 const WhatsAppButton: React.FC = () => {
-    const phoneNumber = "911234567890"; // TODO: Replace with actual business number
+    const phoneNumber = "916361087282"; // Updated business number
     const message = encodeURIComponent("Hello! I'm interested in Videeptha Foods products. Can you help me?");
     const whatsappUrl = `https://wa.me/${phoneNumber}?text=${message}`;
 
@@ -14,8 +14,8 @@ const WhatsAppButton: React.FC = () => {
             whileTap={{ scale: 0.9 }}
             className="fixed bottom-24 sm:bottom-8 right-6 z-[999] flex flex-col items-center gap-1.5"
         >
-            <div className="bg-white/10 backdrop-blur-xl border border-white/20 px-3 py-1.5 sm:px-4 sm:py-2 rounded-full mb-1 sm:mb-2 shadow-2xl">
-                <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-white">Let's Catch Up</span>
+            <div className="bg-transparent px-3 py-1.5 sm:px-4 sm:py-2 rounded-full mb-1 sm:mb-2">
+                <span className="text-[8px] sm:text-[10px] font-black uppercase tracking-widest text-[var(--color-secondary)]">Let's Catch Up</span>
             </div>
             <a
                 href={whatsappUrl}

@@ -13,7 +13,9 @@ COPY . /app/
 
 # Build argument for API URL
 ARG VITE_API_BASE
+ARG VITE_GOOGLE_CLIENT_ID
 ENV VITE_API_BASE=${VITE_API_BASE}
+ENV VITE_GOOGLE_CLIENT_ID=${VITE_GOOGLE_CLIENT_ID}
 
 # Build the application
 RUN npm run build

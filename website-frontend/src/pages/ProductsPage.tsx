@@ -1,5 +1,5 @@
 import { useEffect, useState, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { Leaf, Heart, FilterX, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
@@ -170,22 +170,32 @@ export default function ProductsPage() {
                     {/* Sticky Modern Filter Bar */}
                     <div className="sticky top-20 z-40 bg-[var(--color-bg)]/80 backdrop-blur-xl border-b border-[var(--color-border)] mb-12 py-4">
                         <div className="max-w-7xl mx-auto px-4">
-                            <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 snap-x">
-                                {uniqueFilterCategories.map((cat) => (
-                                    <button
-                                        key={cat.id}
-                                        onClick={() => {
-                                            setSelectedCategory(cat.id);
-                                            setSearchParams({ category: cat.id });
-                                        }}
-                                        className={`px-8 py-3 rounded-full font-black uppercase tracking-[0.15em] text-[10px] whitespace-nowrap transition-all snap-center ${selectedCategory === cat.id
-                                            ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20'
-                                            : 'bg-[var(--color-panel)] text-[var(--color-text)]/40 border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:text-[var(--color-text)]'
-                                            }`}
-                                    >
-                                        {cat.name}
-                                    </button>
-                                ))}
+                            <div className="flex items-center gap-4 mb-4">
+                                <Link
+                                    to="/categories"
+                                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-secondary)]/10 text-[var(--color-secondary)] rounded-xl border border-[var(--color-secondary)]/20 hover:bg-[var(--color-secondary)]/20 transition-all text-[10px] font-black uppercase tracking-widest group"
+                                >
+                                    <Leaf size={14} className="group-hover:rotate-12 transition-transform" />
+                                    Categories
+                                </Link>
+                                <div className="h-4 w-[1px] bg-[var(--color-border)] mx-2" />
+                                <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 snap-x flex-1">
+                                    {uniqueFilterCategories.map((cat) => (
+                                        <button
+                                            key={cat.id}
+                                            onClick={() => {
+                                                setSelectedCategory(cat.id);
+                                                setSearchParams({ category: cat.id });
+                                            }}
+                                            className={`px-8 py-3 rounded-full font-black uppercase tracking-[0.15em] text-[10px] whitespace-nowrap transition-all snap-center ${selectedCategory === cat.id
+                                                ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20'
+                                                : 'bg-[var(--color-panel)] text-[var(--color-text)]/40 border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:text-[var(--color-text)]'
+                                                }`}
+                                        >
+                                            {cat.name}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
 
                             {/* Sub-Filters & Controls */}

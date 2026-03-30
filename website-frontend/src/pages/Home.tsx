@@ -107,27 +107,7 @@ export default function Home() {
                     style={{ background: 'linear-gradient(to bottom, rgba(0,0,0, 0.4) 0%, var(--color-bg) 100%)', opacity: 0.8 }}
                 />
 
-                {/* Flying Birds Animation Background */}
-                <div className="absolute top-0 left-0 w-full h-full overflow-hidden z-0 pointer-events-none opacity-60">
-                    {[...Array(5)].map((_, i) => (
-                        <motion.div
-                            key={i}
-                            initial={{ x: '-10%', y: `${20 + i * 15}%` }}
-                            animate={{ x: '110%', y: `${10 + i * 10}%` }}
-                            transition={{
-                                duration: 15 + i * 5,
-                                repeat: Infinity,
-                                ease: "linear",
-                                delay: i * 2,
-                            }}
-                            className="absolute text-[var(--color-text)]"
-                        >
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                <path d="M2.87277 13.9114C4.30159 13.0645 6.00936 12.5 7.82843 12.5C9.64749 12.5 11.3553 13.0645 12.7841 13.9114C14.2129 13.0645 15.9207 12.5 17.7398 12.5C19.5588 12.5 21.2666 13.0645 22.6954 13.9114" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                            </svg>
-                        </motion.div>
-                    ))}
-                </div>
+
 
                 <motion.div
                     className="relative z-10 text-center px-4 pt-32 pb-16"
@@ -163,7 +143,7 @@ export default function Home() {
                     </motion.p>
 
                     <motion.div variants={fadeUpVariant} className="flex gap-4 justify-center items-center flex-wrap">
-                        <Link to="/products">
+                        <Link to="/categories">
                             <motion.div
                                 whileHover={{ scale: 1.05, x: 10 }}
                                 whileTap={{ scale: 0.95 }}
@@ -459,7 +439,7 @@ export default function Home() {
                     >
                         <h3 className="text-4xl md:text-5xl font-serif font-black text-[var(--color-primary)] mb-6 leading-tight">Discover Our Entire Range</h3>
                         <p className="text-[var(--color-text)]/80 text-xl font-medium mb-10 leading-relaxed">Explore over 600+ authentic, untouched products from the heart of our villages.</p>
-                        <Link to="/products">
+                        <Link to="/categories">
                             <motion.div
                                 whileHover={{ scale: 1.05, x: 15 }}
                                 whileTap={{ scale: 0.95 }}

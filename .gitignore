@@ -1,0 +1,42 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+dist/
+build/
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+pip-log.txt
+pip-delete-this-directory.txt
+.tox/
+.coverage
+.cache
+nosetests.xml
+coverage.xml
+*,cover
+.hypothesis/
+
+# Environment
+.env
+.env.local
+.env.*.local
+db.sqlite3
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project-specific
+backup/
+*.gz
+*.tar.gz
+*.zip
+*.log

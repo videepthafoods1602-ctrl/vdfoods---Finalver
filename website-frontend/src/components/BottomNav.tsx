@@ -16,7 +16,7 @@ const BottomNav = () => {
     const navItems = [
         { label: 'Village', icon: Home, path: '/', count: 0 },
         { label: 'Kitchen', icon: BookOpen, path: '/#stories', count: 0 },
-        { label: 'Shop', icon: LayoutGrid, path: '/products', count: 0 },
+        { label: 'Shop', icon: LayoutGrid, path: '/categories', count: 0 },
         { label: isLoggedIn ? 'Profile' : 'Login', icon: User, path: isLoggedIn ? '/settings' : '/login', count: 0, action: !isLoggedIn ? openAuthModal : null },
     ];
 

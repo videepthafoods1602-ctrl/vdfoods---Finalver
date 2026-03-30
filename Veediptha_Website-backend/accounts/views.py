@@ -380,7 +380,9 @@ class GoogleLoginView(APIView):
                 return Response({
                     'status': 'needs_completion',
                     'pre_auth_token': pre_auth_token,
-                    'full_name': name
+                    'full_name': name,
+                    'email': email,
+                    'avatar_url': picture,
                 }, status=status.HTTP_202_ACCEPTED)
 
             if user.is_deleted:
@@ -413,7 +415,9 @@ class GoogleLoginView(APIView):
                 return Response({
                     'status': 'needs_completion',
                     'pre_auth_token': pre_auth_token,
-                    'full_name': name
+                    'full_name': name,
+                    'email': email,
+                    'avatar_url': picture,
                 }, status=status.HTTP_202_ACCEPTED)
             except Exception as e:
                 return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

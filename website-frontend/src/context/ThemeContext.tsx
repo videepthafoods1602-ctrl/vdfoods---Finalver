@@ -142,7 +142,7 @@ export const ThemeProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 root.style.setProperty('--color-primary-rgb', `${r}, ${g}, ${b}`);
             }
         }
-        root.style.setProperty('--color-secondary', '#633919');
+        root.style.setProperty('--color-secondary', '#7b3f00');
         root.style.setProperty('--color-accent', currentColors.accent);
         root.style.setProperty('--color-background', currentColors.background);
         root.style.setProperty('--color-bg', currentColors.background);

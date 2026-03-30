@@ -28,8 +28,8 @@ const MobileBottomNav = () => {
 
                 {/* Shop */}
                 <Link
-                    to="/products"
-                    className={`flex flex-col items-center justify-center text-xs ${isActive("/products") ? "text-[var(--color-primary)] font-bold scale-105" : "text-[var(--color-text)]/60"
+                    to="/categories"
+                    className={`flex flex-col items-center justify-center text-xs ${isActive("/categories") ? "text-[var(--color-primary)] font-bold scale-105" : "text-[var(--color-text)]/60"
                         }`}
                 >
                     <ShoppingBag size={20} />

@@ -25,7 +25,7 @@ const AuthModal: React.FC = () => {
                         initial={{ opacity: 0, scale: 0.9, y: 20 }}
                         animate={{ opacity: 1, scale: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.9, y: 20 }}
-                        className="fixed inset-0 flex items-center justify-center pointer-events-none z-[9991] p-4"
+                        className="fixed inset-0 flex items-center justify-center pointer-events-none z-[9991] p-6 sm:p-4"
                     >
                         <div className="w-full max-w-lg pointer-events-auto relative">
                             {/* Close Button */}

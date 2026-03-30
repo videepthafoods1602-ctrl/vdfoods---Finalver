@@ -172,6 +172,13 @@ class FavoriteListView(APIView):
         favorites = Favorite.objects.filter(user=request.user)
         return Response([f.product_id for f in favorites])
 
+    def post(self, request):
+        product_id = request.data.get('product_id')
+        if not product_id:
+            return Response({"error": "product_id is required"}, status=400)
+        Favorite.objects.get_or_create(user=request.user, product_id=product_id)
+        return Response(status=201)
+
 class FavoriteRemoveView(APIView):
     permission_classes = [permissions.IsAuthenticated]
     def delete(self, request, product_id):

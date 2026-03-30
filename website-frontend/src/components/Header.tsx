@@ -12,7 +12,7 @@ import { API_URL } from '../config';
 const DEFAULT_NAV_ITEMS = [
     { label: 'Village', link: '/' },
     { label: 'Market Explorer', link: '/market-explorer' },
-    { label: 'Collections', link: '/categories' },
+    { label: 'Shop', link: '/categories' },
     { label: 'Kitchen Stories', link: '/stories' },
     { label: 'Policies', link: '/policies' },
 ];
@@ -100,10 +100,10 @@ const Header = () => {
 
                                 <Link to="/" className="flex items-center gap-3 group">
                                     <div className={isNestedPage ? "hidden sm:block" : "block"}>
-                                        <span className={`text-xl sm:text-2xl font-black tracking-wider font-['Gagalin'] uppercase block leading-none ${scrolled ? 'text-[var(--color-primary)]' : 'text-white'}`}>
+                                        <span className={`text-lg sm:text-2xl font-black tracking-wider font-['Gagalin'] uppercase block leading-none text-[var(--color-secondary)]`}>
                                             VIDYA-PRADEEP
                                         </span>
-                                        <span className={`text-[10px] sm:text-xs font-black uppercase font-['Gagalin'] tracking-wider block mt-1 ${scrolled ? 'text-[var(--color-text)]' : 'text-white/80'}`}>
+                                        <span className={`text-[10px] sm:text-xs font-black uppercase font-['Gagalin'] tracking-wider block mt-1 ${scrolled ? 'text-[var(--color-text)]' : 'text-black/80'}`}>
                                             MILLETS ARE NOT BORING BOSS 😎🤪
                                         </span>
                                     </div>
@@ -119,10 +119,10 @@ const Header = () => {
                                             <Link
                                                 to={safeLink}
                                                 className={`px-6 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all duration-300 ${isActive(safeLink)
-                                                    ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20'
+                                                    ? 'bg-[var(--color-secondary)] text-white shadow-lg shadow-[var(--color-secondary)]/20'
                                                     : scrolled 
                                                         ? 'text-[var(--color-text)]/60 hover:text-[var(--color-text)] hover:bg-[var(--color-panel)]'
-                                                        : 'text-white/70 hover:text-white hover:bg-white/10'
+                                                        : 'text-black/70 hover:text-black hover:bg-black/10'
                                                     }`}
                                             >
                                                 {item.label}
@@ -141,9 +141,9 @@ const Header = () => {
                                             await refreshLocation();
                                             setTimeout(() => setShowLocationTooltip(false), 3000);
                                         }}
-                                        className="flex items-center gap-2 text-[var(--color-text)] text-[10px] font-black uppercase tracking-widest bg-[var(--color-panel)] px-2 py-2 sm:px-3 rounded-xl border border-[var(--color-border)] hover:bg-[var(--color-panel)] transition-colors cursor-pointer"
+                                        className="flex items-center justify-center gap-2 text-[var(--color-text)] text-[10px] font-black uppercase tracking-widest bg-[var(--color-panel)] w-11 h-11 md:w-auto md:px-3 rounded-xl border border-[var(--color-border)] hover:bg-[var(--color-panel)] transition-colors cursor-pointer"
                                     >
-                                        <MapPin size={16} className="text-[var(--color-primary)] flex-shrink-0 drop-shadow-[0_0_8px_var(--color-primary)]" />
+                                        <MapPin className="text-[var(--color-secondary)] flex-shrink-0 drop-shadow-[0_0_8px_var(--color-secondary)] w-4.5 h-4.5 sm:w-5 sm:h-5" />
                                         <span className="hidden md:inline truncate">
                                             {locationData?.country_name || 'United States'}
                                         </span>
@@ -171,8 +171,7 @@ const Header = () => {
                                         className="relative flex items-center justify-center w-11 h-11 bg-[var(--color-panel)] hover:bg-white rounded-2xl border border-[var(--color-border)] transition-all group"
                                     >
                                         <Search
-                                            size={20}
-                                            className={`${scrolled ? 'text-[var(--color-text)]/80' : 'text-white/80'} group-hover:text-[var(--color-primary)]`}
+                                            className={`${scrolled ? 'text-[var(--color-text)]/80' : 'text-black/80'} group-hover:text-[var(--color-secondary)] w-4.5 h-4.5 sm:w-5 sm:h-5`}
                                         />
                                     </Link>
                                 </Magnetic>
@@ -183,8 +182,7 @@ const Header = () => {
                                         className="relative flex items-center justify-center w-11 h-11 bg-[var(--color-panel)] hover:bg-white rounded-2xl border border-[var(--color-border)] transition-all group mr-2"
                                     >
                                         <Heart
-                                            size={20}
-                                            className={`${scrolled ? 'text-[var(--color-text)]/80' : 'text-white/80'} group-hover:text-red-500`}
+                                            className={`${scrolled ? 'text-[var(--color-text)]/80' : 'text-black/80'} group-hover:text-red-500 w-4.5 h-4.5 sm:w-5 sm:h-5`}
                                         />
                                     </Link>
                                 </Magnetic>
@@ -195,8 +193,7 @@ const Header = () => {
                                         className="relative flex items-center justify-center w-11 h-11 bg-[var(--color-panel)] hover:bg-white rounded-2xl border border-[var(--color-border)] transition-all group"
                                     >
                                         <ShoppingBag
-                                            size={20}
-                                            className={`${scrolled ? 'text-[var(--color-text)]/80' : 'text-white/80'} group-hover:text-[var(--color-primary)]`}
+                                            className={`${scrolled ? 'text-[var(--color-text)]/80' : 'text-black/80'} group-hover:text-[var(--color-secondary)] w-4.5 h-4.5 sm:w-5 sm:h-5`}
                                         />
 
                                         {cartCount > 0 && (
@@ -211,9 +208,9 @@ const Header = () => {
                                     {isLoggedIn ? (
                                         <Link
                                             to="/settings"
-                                            className="flex items-center p-1.5 bg-[var(--color-primary)]/5 hover:bg-[var(--color-primary)]/10 border border-[var(--color-primary)]/20 rounded-2xl transition-all group overflow-hidden"
+                                            className="flex items-center p-1.5 bg-[var(--color-secondary)]/5 hover:bg-[var(--color-secondary)]/10 border border-[var(--color-secondary)]/20 rounded-2xl transition-all group overflow-hidden"
                                         >
-                                            <div className="w-8 h-8 rounded-xl bg-[var(--color-primary)] flex items-center justify-center text-[var(--color-bg)] font-black text-xs overflow-hidden">
+                                            <div className="w-8 h-8 rounded-xl bg-[var(--color-secondary)] flex items-center justify-center text-[var(--color-bg)] font-black text-xs overflow-hidden">
                                                 {user?.profile?.avatar_url ? (
                                                     <img
                                                         src={user.profile.avatar_url}
@@ -228,9 +225,9 @@ const Header = () => {
                                     ) : (
                                         <button
                                             onClick={openAuthModal}
-                                            className="flex items-center justify-center w-11 h-11 bg-[var(--color-primary)] text-[var(--color-bg)] rounded-2xl shadow-xl shadow-[var(--color-primary)]/20 hover:scale-105 active:scale-95 transition-all"
+                                            className="flex items-center justify-center w-11 h-11 bg-[var(--color-secondary)] text-white rounded-2xl shadow-xl shadow-[var(--color-secondary)]/20 hover:scale-105 active:scale-95 transition-all"
                                         >
-                                            <LogIn size={18} />
+                                            <LogIn className="w-4.5 h-4.5 sm:w-5 sm:h-5" />
                                         </button>
                                     )}
                                 </div>

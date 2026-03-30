@@ -23,6 +23,8 @@ services:
     volumes:
       - ./Veediptha_Website-backend:/app
       - shared_media:/app/media
+    env_file:
+      - ./Veediptha_Website-backend/.env
     ports:
       - "8000:8000"
     environment:
@@ -38,6 +40,7 @@ services:
       context: ./website-frontend
       dockerfile: Dockerfile
       args:
+        - VITE_GOOGLE_CLIENT_ID=143120200456-1kumvk1m76p3d7fv6rde352bp2hajvoe.apps.googleusercontent.com
         - VITE_API_BASE=https://videepthamdfoods.com
     container_name: vdfoods_frontend
     restart: always
