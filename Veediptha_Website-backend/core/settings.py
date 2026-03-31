@@ -20,7 +20,7 @@ SECRET_KEY = env('SECRET_KEY', default='django-insecure-c+tya5^h$(p40^c5(qtf-ljf
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = env.bool('DEBUG', default=True)
 
-ALLOWED_HOSTS = ['videepthamdfoods.com', '187.77.186.154', 'localhost', '127.0.0.1']
+ALLOWED_HOSTS = ['videepthamdfoods.com', 'www.videepthamdfoods.com', '187.77.186.154', 'localhost', '127.0.0.1']
 # Application definition
 INSTALLED_APPS = [
     'django.contrib.admin',
@@ -190,12 +190,14 @@ if not DEBUG:
     CORS_ALLOW_ALL_ORIGINS = False
     CORS_ALLOWED_ORIGINS = env.list('CORS_ALLOWED_ORIGINS', default=[
         'https://videepthamdfoods.com',
+        'https://www.videepthamdfoods.com',
         'http://videepthamdfoods.com',
         'http://localhost:5173',
         'http://localhost:8000'
     ])
     CSRF_TRUSTED_ORIGINS = [
         'https://videepthamdfoods.com',
+        'https://www.videepthamdfoods.com',
         'http://videepthamdfoods.com'
     ]
 
