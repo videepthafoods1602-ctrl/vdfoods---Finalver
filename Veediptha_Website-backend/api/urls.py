@@ -30,6 +30,7 @@ urlpatterns = [
     # Customer Logic
     path('orders/', website_views.OrderListView.as_view(), name='order-list'),
     path('orders/<str:id>/', website_views.OrderDetailView.as_view(), name='order-detail'),
+    path('bulk-orders/', website_views.BulkOrderListView.as_view(), name='bulk-order-list'),
     path('promotions/', website_views.PromotionListView.as_view(), name='promotion-list'),
     path('support-tickets/', website_views.SupportTicketListView.as_view(), name='support-ticket-list'),
     path('support-tickets/<str:id>/', website_views.SupportTicketDetailView.as_view(), name='support-ticket-detail'),

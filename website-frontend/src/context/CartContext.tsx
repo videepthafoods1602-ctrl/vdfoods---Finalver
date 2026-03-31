@@ -11,6 +11,7 @@ interface CartItem {
     image: string;
     quantity: number;
     selectedWeight?: string;
+    attributes?: Record<string, any>;
 }
 
 interface CartContextType {

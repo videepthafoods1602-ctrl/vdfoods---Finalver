@@ -608,7 +608,7 @@ export default function Auth({ mode = 'login', isModal = false }: { mode?: 'logi
                         </form>
                     </div>
                 ) : (
-                    <div className="vintage-panel min-h-[600px] flex flex-col relative overflow-visible border-2 border-primary/20 shadow-[0_0_50px_rgba(0,0,0,0.5)]">
+                    <div className={`${isModal ? 'min-h-0 py-6' : 'min-h-[600px] py-12'} vintage-panel flex flex-col relative overflow-visible border-2 border-primary/20 shadow-[0_0_50px_rgba(0,0,0,0.5)]`}>
 
                         {/* Royal inner border decoration */}
                         <div className="absolute inset-1 border border-primary/5 rounded-2xl pointer-events-none z-0" />
@@ -634,11 +634,8 @@ export default function Auth({ mode = 'login', isModal = false }: { mode?: 'logi
                         <div className="p-6 sm:p-10 flex-1 flex flex-col bg-transparent relative z-10">
 
                             {/* Title */}
-                            <div className="text-center mb-10">
-                                <h1 className="text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-primary via-[var(--color-text)] to-secondary mb-3 drop-shadow-sm font-serif">
-                                    {authMode === 'login' ? 'Royal Entry' : authMode === 'signup' ? 'Join the Village' : authMode === 'reset' ? 'Reset Key' : 'Unlock Account'}
-                                </h1>
-                                <p className="text-[var(--color-text)]/50 text-xs uppercase tracking-widest font-sans">Secure • Verified • Encrypted</p>
+                            <div className={`text-center ${isModal ? 'mb-6' : 'mb-10'}`}>
+                                <p className="text-[var(--color-text)]/50 text-[10px] sm:text-xs uppercase tracking-[0.3em] font-sans">Secure • Verified • Encrypted</p>
                             </div>
 
                             {/* Alerts */}

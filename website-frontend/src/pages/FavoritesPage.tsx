@@ -128,7 +128,7 @@ export default function FavoritesPage() {
                                     <button
                                         onClick={(e) => {
                                             e.preventDefault();
-                                            addToCart({ ...product, price: product.price, image: resolveImageUrl(product.images[0]), quantity: 1 });
+                                            addToCart({ ...product, price: product.price, image: resolveImageUrl(product.images[0]), quantity: 1, attributes: product.attributes });
                                         }}
                                         className="w-full mt-4 bg-[var(--color-text)] text-white hover:bg-[var(--color-primary)] py-3 rounded-full font-bold uppercase tracking-widest text-xs transition-colors shadow-md"
                                     >

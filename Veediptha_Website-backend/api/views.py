@@ -6,7 +6,7 @@ from rest_framework.views import APIView
 from .models import (
     Page, Product, Category, Coupon, Story, Hero, Navigation, 
     WebsiteTheme, WebsiteBranding, WebsiteTypography, WebsiteFooter,
-    Policy, Promotion, SupportTicket, Order
+    Policy, Promotion, SupportTicket, Order, BulkOrder
 )
 from .currency_utils import get_usd_inr_rate
 from .serializers import (
@@ -14,8 +14,10 @@ from .serializers import (
     CouponSerializer, StorySerializer, HeroSerializer, NavigationSerializer,
     WebsiteThemeSerializer, WebsiteBrandingSerializer, WebsiteTypographySerializer,
     WebsiteFooterSerializer, PolicySerializer, OrderSerializer, PromotionSerializer,
-    SupportTicketSerializer, StoryListSerializer
+    SupportTicketSerializer, StoryListSerializer, BulkOrderSerializer
 )
+from django.core.mail import send_mail
+from django.conf import settings
 from accounts.models import Favorite, ProductAnalytics
 from django.db.models import F
 import requests
@@ -143,6 +145,44 @@ class OrderListView(generics.ListCreateAPIView):
         return Order.objects.filter(user_id=str(self.request.user.id)).order_by('-created_at')
     def perform_create(self, serializer):
         serializer.save(user_id=str(self.request.user.id), order_number=f"ORD-{datetime.datetime.now().strftime('%Y%m%d')}-{datetime.datetime.now().microsecond}")
+
+class BulkOrderListView(generics.ListCreateAPIView):
+    serializer_class = BulkOrderSerializer
+    permission_classes = [permissions.IsAuthenticated]
+
+    def get_queryset(self):
+        return BulkOrder.objects.filter(user_id=str(self.request.user.id)).order_by('-created_at')
+
+    def perform_create(self, serializer):
+        # Generate order number
+        order_num = f"BLK-{datetime.datetime.now().strftime('%Y%m%d')}-{datetime.datetime.now().microsecond}"
+        instance = serializer.save(user_id=str(self.request.user.id), order_number=order_num)
+        
+        # Send automated email to management
+        try:
+            items_list = "\n".join([f"- {item.get('product_name')} (Qty: {item.get('quantity')})" for item in instance.items])
+            address = instance.shipping_address
+            address_str = f"{address.get('street_address')}, {address.get('city')}, {address.get('state')} {address.get('pincode')}"
+            
+            subject = f"NEW BULK ORDER: {order_num}"
+            message = (
+                f"A new bulk order has been placed by {self.request.user.email}.\n\n"
+                f"Order Number: {order_num}\n"
+                f"Total Amount: {instance.currency} {instance.total_amount}\n"
+                f"Items:\n{items_list}\n\n"
+                f"Shipping Address:\n{address_str}\n\n"
+                f"Please review this request in the admin panel."
+            )
+            
+            send_mail(
+                subject,
+                message,
+                settings.DEFAULT_FROM_EMAIL,
+                ['videepthafoods1602@gmail.com'],
+                fail_silently=True,
+            )
+        except Exception as e:
+            print(f"Error sending bulk order email: {str(e)}")
 
 class OrderDetailView(generics.RetrieveAPIView):
     serializer_class = OrderSerializer

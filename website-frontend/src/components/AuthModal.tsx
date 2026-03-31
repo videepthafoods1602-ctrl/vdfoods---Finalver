@@ -37,7 +37,7 @@ const AuthModal: React.FC = () => {
                             </button>
 
                             {/* Auth Card wrapper to override local screen styles if needed */}
-                            <div className="overflow-hidden rounded-3xl shadow-2xl bg-[var(--color-bg)] border border-[var(--color-border)]">
+                            <div className="overflow-y-auto max-h-[90vh] scrollbar-hide rounded-3xl shadow-2xl bg-[var(--color-bg)] border border-[var(--color-border)]">
                                 <Auth isModal={true} />
                             </div>
                         </div>

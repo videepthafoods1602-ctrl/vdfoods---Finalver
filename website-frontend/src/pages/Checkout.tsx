@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { ShoppingBag, ArrowLeft, CreditCard, Truck, ShieldCheck, MapPin, Phone, User, ChevronRight, Plus, Minus, Trash2, Info, Loader2 } from 'lucide-react';
+import { ShoppingBag, ArrowLeft, CreditCard, Truck, ShieldCheck, MapPin, Phone, User, ChevronRight, Plus, Minus, Trash2, Info, Loader2, Heart } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { Link, useNavigate } from 'react-router-dom';
@@ -103,17 +103,25 @@ const styles = {
 };
 
 const CheckoutPage = () => {
-    const { cartItems, cartTotal, clearCart, formatPrice, currency, locationData, updateQuantity, removeFromCart } = useCart();
+    const { cartItems, cartTotal, clearCart, formatPrice, currency, locationData, updateQuantity, removeFromCart, addToCart } = useCart();
     const { user, isLoggedIn, loading: authLoading, openAuthModal } = useAuth();
     const navigate = useNavigate();
 
+    const parseWeight = (weightStr: string) => {
+        if (!weightStr) return 0;
+        const num = parseFloat(weightStr.replace(/[^\d.]/g, '')) || 0;
+        const unit = weightStr.toLowerCase();
+        if (unit.includes('kg')) return num * 1000;
+        if (unit.includes('ml') || unit.includes('g')) return num;
+        return num; // Default grams
+    };
+
     const totalWeight = cartItems.reduce((acc, item: any) => {
-        const weightStr = item.attributes?.weight || '0';
-        const weightVal = parseFloat(weightStr.replace(/[^\d.]/g, '')) || 0;
+        const weightVal = parseWeight(item.attributes?.weight || item.selectedWeight || '0');
         return acc + (weightVal * item.quantity);
     }, 0);
 
-    const isBulkOrder = totalWeight >= 5000; // 5kg = 5000g assumed
+    const isBulkOrder = totalWeight >= 4700; // 4.7kg = 4700g
 
     const [selectedAddressId, setSelectedAddressId] = useState<string | null>(null);
     const [isAddingAddress, setIsAddingAddress] = useState(false);
@@ -147,6 +155,52 @@ const CheckoutPage = () => {
     const [discountAmount, setDiscountAmount] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(false);
+    const [favorites, setFavorites] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchFavorites = async () => {
+            const token = localStorage.getItem('access_token');
+            if (!token) return;
+            try {
+                const favRes = await fetch(`${API_URL}/favorites/`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (favRes.ok) {
+                    const favIds = await favRes.json();
+                    if (Array.isArray(favIds) && favIds.length > 0) {
+                        const prodRes = await fetch(`${API_URL}/products/`);
+                        const allProducts = await prodRes.json();
+                        setFavorites(allProducts.filter((p: any) => favIds.includes(p._id)));
+                    }
+                }
+            } catch (err) {
+                console.error('Fetch favorites error:', err);
+            }
+        };
+        fetchFavorites();
+    }, []);
+
+    const toggleFavorite = async (productId: string) => {
+        const token = localStorage.getItem('access_token');
+        if (!token) return;
+        const isFav = favorites.some(f => f._id === productId);
+        try {
+            if (isFav) {
+                await axios.delete(`${API_URL}/favorites/${productId}/`, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                setFavorites(prev => prev.filter(f => f._id !== productId));
+            } else {
+                await axios.post(`${API_URL}/favorites/`, { product_id: productId }, {
+                    headers: { Authorization: `Bearer ${token}` }
+                });
+                const prodRes = await axios.get(`${API_URL}/products/${productId}/`);
+                setFavorites(prev => [...prev, prodRes.data]);
+            }
+        } catch (err) {
+            console.error('Toggle favorite error:', err);
+        }
+    };
 
     // Enforce Login
     useEffect(() => {
@@ -254,17 +308,19 @@ const CheckoutPage = () => {
             };
 
             setIsSubmitting(true);
-            await axios.post(`${API_URL}/orders/`, data, {
+            const endpoint = isBulkOrder ? `${API_URL}/bulk-orders/` : `${API_URL}/orders/`;
+            
+            await axios.post(endpoint, data, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
             setOrderSuccess(true);
             clearCart();
             
-            // Redirect after 2.5 seconds
+            // Redirect after delay
             setTimeout(() => {
                 navigate('/account?tab=orders');
-            }, 2500);
+            }, 3500);
 
         } catch (err: any) {
             alert('Failed to place order:\n' + JSON.stringify(err.response?.data || err.message, null, 2));
@@ -496,6 +552,42 @@ const CheckoutPage = () => {
                                     </div>
                                 </div>
                             </div>
+
+                            {favorites.length > 0 && (
+                                <div style={styles.section} className="p-6 md:p-10">
+                                    <div className="flex items-center justify-between mb-8">
+                                        <h2 style={{ ...styles.sectionTitle, marginBottom: 0 }} className="text-xl md:text-2xl">
+                                            <Heart size={24} color="#ef4444" fill="#ef4444" /> From Your Favorites
+                                        </h2>
+                                        <Link to="/products" className="text-xs font-black uppercase tracking-widest text-[var(--color-primary)] hover:underline">
+                                            See All Products
+                                        </Link>
+                                    </div>
+                                    <div className="flex overflow-x-auto gap-4 pb-4 scrollbar-hide">
+                                        {favorites.map((product) => (
+                                            <div key={product._id} className="min-w-[200px] bg-[var(--color-panel)] rounded-2xl p-4 border border-[var(--color-border)] relative group">
+                                                <button 
+                                                    onClick={() => toggleFavorite(product._id)}
+                                                    className="absolute top-2 right-2 z-10 p-1.5 bg-red-500 text-white rounded-full transition-transform hover:scale-110"
+                                                >
+                                                    <Heart size={12} fill="white" />
+                                                </button>
+                                                <div className="aspect-square rounded-xl overflow-hidden mb-3 bg-white/50">
+                                                    <img src={product.images[0]} className="w-full h-full object-cover mix-blend-multiply" />
+                                                </div>
+                                                <h3 className="text-sm font-bold truncate mb-1">{product.name}</h3>
+                                                <p className="text-[var(--color-primary)] font-black text-xs mb-3">{formatPrice(product.price)}</p>
+                                                <button 
+                                                    onClick={() => addToCart({ ...product, price: product.price, image: product.images[0], quantity: 1 })}
+                                                    className="w-full py-2 bg-[var(--color-text)] text-white text-[10px] font-black uppercase tracking-widest rounded-lg hover:bg-[var(--color-primary)] transition-colors"
+                                                >
+                                                    Add to Basket
+                                                </button>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
                         </form>
                     </div>
 
@@ -510,14 +602,40 @@ const CheckoutPage = () => {
                                             <div style={{ flex: 1 }}>
                                                 <div style={{ fontWeight: 800, fontSize: '15px', color: 'var(--color-text)', marginBottom: '4px' }}>{item.name}</div>
                                                 <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
-                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', background: 'rgba(0,0,0,0.05)', borderRadius: '8px', padding: '2px 8px' }}>
-                                                        <button onClick={() => updateQuantity(item._id, item.quantity - 1)} style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', padding: '4px' }}><Minus size={14} /></button>
-                                                        <span style={{ fontWeight: 800, fontSize: '13px', minWidth: '15px', textAlign: 'center' }}>{item.quantity}</span>
-                                                        <button onClick={() => updateQuantity(item._id, item.quantity + 1)} style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', padding: '4px' }}><Plus size={14} /></button>
+                                                    <div style={{ display: 'flex', alignItems: 'center', gap: '10px', background: 'var(--color-bg)', border: '1px solid var(--color-border)', borderRadius: '12px', padding: '4px 10px' }}>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => updateQuantity(item._id, item.quantity - 1)} 
+                                                            style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', padding: '4px', color: 'var(--color-text)', opacity: 0.7 }}
+                                                        >
+                                                            <Minus size={14} strokeWidth={3} />
+                                                        </button>
+                                                        <span style={{ fontWeight: 900, fontSize: '14px', minWidth: '20px', textAlign: 'center', color: 'var(--color-primary)' }}>{item.quantity}</span>
+                                                        <button 
+                                                            type="button"
+                                                            onClick={() => updateQuantity(item._id, item.quantity + 1)} 
+                                                            style={{ border: 'none', background: 'none', cursor: 'pointer', display: 'flex', padding: '4px', color: 'var(--color-text)', opacity: 0.7 }}
+                                                        >
+                                                            <Plus size={14} strokeWidth={3} />
+                                                        </button>
                                                     </div>
                                                     <button 
+                                                        type="button"
                                                         onClick={() => removeFromCart(item._id)}
-                                                        style={{ border: 'none', background: 'none', cursor: 'pointer', color: '#ef4444', display: 'flex', opacity: 0.6 }}
+                                                        style={{ 
+                                                            width: '32px', 
+                                                            height: '32px', 
+                                                            borderRadius: '10px', 
+                                                            border: 'none', 
+                                                            background: 'rgba(239, 68, 68, 0.1)', 
+                                                            cursor: 'pointer', 
+                                                            color: '#ef4444', 
+                                                            display: 'flex', 
+                                                            alignItems: 'center', 
+                                                            justifyContent: 'center',
+                                                            transition: 'all 0.2s ease'
+                                                        }}
+                                                        className="hover:scale-110 active:scale-95"
                                                     >
                                                         <Trash2 size={16} />
                                                     </button>
@@ -558,10 +676,14 @@ const CheckoutPage = () => {
                                         gap: '12px',
                                         alignItems: 'start'
                                     }}>
-                                        <Info size={20} color="#ef4444" style={{ flexShrink: 0, marginTop: '2px' }} />
+                                        <div className="bg-red-500 p-1.5 rounded-full mt-0.5">
+                                            <Info size={14} color="white" />
+                                        </div>
                                         <div>
-                                            <p style={{ color: '#ef4444', fontWeight: 800, fontSize: '13px', margin: 0 }}>Bulk Shipping Rule Active</p>
-                                            <p style={{ color: '#ef4444', fontSize: '12px', opacity: 0.8, margin: '4px 0 0' }}>Your order exceeds 5kg. Please contact manager for bulk shipping arrangements.</p>
+                                            <p style={{ color: '#ef4444', fontWeight: 800, fontSize: '13px', margin: 0 }}>Bulk Harvest Rule (4.7kg+)</p>
+                                            <p style={{ color: '#ef4444', fontSize: '12px', opacity: 0.8, margin: '4px 0 0' }}>
+                                                Your order exceeds 4.7kg. It will be recorded as a Bulk Request; our manager will review the details and update you soon for delivery.
+                                            </p>
                                         </div>
                                     </div>
                                 )}
@@ -600,13 +722,17 @@ const CheckoutPage = () => {
                                 </div>
 
                                 <motion.button
-                                    whileHover={{ scale: (isBulkOrder || isSubmitting || orderSuccess) ? 1 : 1.02 }}
-                                    whileTap={{ scale: (isBulkOrder || isSubmitting || orderSuccess) ? 1 : 0.98 }}
-                                    disabled={isBulkOrder || isSubmitting || orderSuccess}
+                                    whileHover={{ scale: (isSubmitting || orderSuccess) ? 1 : 1.02 }}
+                                    whileTap={{ scale: (isSubmitting || orderSuccess) ? 1 : 0.98 }}
+                                    animate={isBulkOrder ? {
+                                        x: [0, -4, 4, -4, 4, 0],
+                                        transition: { repeat: Infinity, duration: 1.5, repeatType: "loop" as const }
+                                    } : {}}
+                                    disabled={isSubmitting || orderSuccess}
                                     style={{
                                         ...styles.orderBtn,
-                                        opacity: (isBulkOrder || isSubmitting || orderSuccess) ? 0.6 : 1,
-                                        cursor: (isBulkOrder || isSubmitting || orderSuccess) ? 'not-allowed' : 'pointer'
+                                        opacity: (isSubmitting || orderSuccess) ? 0.6 : 1,
+                                        cursor: (isSubmitting || orderSuccess) ? 'not-allowed' : 'pointer'
                                     }}
                                     onClick={handleSubmit}
                                 >
@@ -618,11 +744,11 @@ const CheckoutPage = () => {
                                     ) : orderSuccess ? (
                                         <>
                                             <ShieldCheck size={20} />
-                                            Order Placed Successfully!
+                                            {isBulkOrder ? 'Bulk Order Received!' : 'Order Placed Successfully!'}
                                         </>
                                     ) : (
                                         <>
-                                            Confirm Order <ChevronRight size={20} />
+                                            {isBulkOrder ? 'Confirm Bulk Order' : 'Confirm Order'} <ChevronRight size={20} />
                                         </>
                                     )}
                                 </motion.button>

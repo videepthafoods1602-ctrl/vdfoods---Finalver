@@ -17,6 +17,7 @@ interface Product {
     stock: number;
     images: string[];
     category_ids: string[];
+    attributes?: Record<string, any>;
     is_active: boolean;
 }
 
@@ -317,7 +318,8 @@ export default function ProductsPage() {
                                                         price: product.price,
                                                         image: product.images?.[0] || '',
                                                         quantity: 1,
-                                                        selectedWeight: selectedWeights[product._id] || '500g'
+                                                        selectedWeight: selectedWeights[product._id] || '500g',
+                                                        attributes: product.attributes
                                                     });
                                                 }}
                                                 disabled={product.stock === 0}

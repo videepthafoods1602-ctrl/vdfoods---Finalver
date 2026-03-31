@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import (
     Page, Product, Category, Coupon, WebsiteTheme, WebsiteBranding, 
-    WebsiteTypography, WebsiteFooter, Story, Hero, Order, Stock, 
+    WebsiteTypography, WebsiteFooter, Story, Hero, Order, BulkOrder, Stock, 
     Promotion, SupportTicket
 )
 from bson import ObjectId
@@ -278,6 +278,22 @@ class OrderSerializer(MongoSerializer):
 
     def create(self, validated_data):
         return Order.objects.create(**validated_data)
+
+class BulkOrderSerializer(MongoSerializer):
+    id = serializers.CharField(read_only=True)
+    _id = serializers.CharField(source='id', read_only=True)
+    user_id = serializers.CharField(required=False)
+    order_number = serializers.CharField(required=False)
+    items = serializers.ListField(child=serializers.DictField())
+    total_amount = serializers.DecimalField(max_digits=10, decimal_places=2)
+    currency = serializers.CharField()
+    status = serializers.CharField(required=False, default='Bulk Order Received')
+    shipping_address = serializers.DictField()
+    bulk_status = serializers.CharField(required=False, default='Pending Manager Review')
+    created_at = serializers.DateTimeField(read_only=True)
+
+    def create(self, validated_data):
+        return BulkOrder.objects.create(**validated_data)
 
 class StockSerializer(MongoSerializer):
     id = serializers.CharField(read_only=True)

@@ -313,7 +313,8 @@ export default function ProductDetailPage() {
                                             price: Number(product.price),
                                             image: resolveImageUrl(product.images[0]),
                                             quantity: quantity,
-                                            selectedWeight: selectedWeight
+                                            selectedWeight: selectedWeight,
+                                            attributes: product.attributes
                                         });
                                     }}
                                 >

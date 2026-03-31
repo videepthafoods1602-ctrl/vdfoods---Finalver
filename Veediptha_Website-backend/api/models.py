@@ -252,6 +252,25 @@ class Order(models.Model):
     def __str__(self):
         return self.order_number
 
+class BulkOrder(models.Model):
+    id = ObjectIdAutoField(primary_key=True)
+    user_id = models.CharField(max_length=100)
+    order_number = models.CharField(max_length=50, unique=True)
+    items = models.JSONField(default=list)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    currency = models.CharField(max_length=10)
+    status = models.CharField(max_length=40, default='Bulk Order Received')
+    shipping_address = models.JSONField(default=dict)
+    bulk_status = models.CharField(max_length=40, default='Pending Manager Review')
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = 'bulk_orders'
+
+    def __str__(self):
+        return f"BULK-{self.order_number}"
+
 class Stock(models.Model):
     id = ObjectIdAutoField(primary_key=True)
     product_id = models.CharField(max_length=100, unique=True)
