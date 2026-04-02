@@ -61,12 +61,14 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
     const refreshUser = async () => {
         const token = localStorage.getItem('access_token');
-        if (!token) { setLoading(false); return; }
+        if (!token) { setLoading(false); return null; }
         try {
             setAuthHeaders(token);
             const { data } = await axios.get(`${API}/me/`);
             // Flatten: merge top-level user fields + profile nested
-            setUser({ ...data.user, profile: data.profile });
+            const updatedUser = { ...data.user, profile: data.profile };
+            setUser(updatedUser);
+            return updatedUser;
         } catch {
             // Try refresh
             const refreshToken = localStorage.getItem('refresh_token');
@@ -77,15 +79,19 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
                     if (data.refresh_token) localStorage.setItem('refresh_token', data.refresh_token);
                     setAuthHeaders(data.access_token);
                     const meRes = await axios.get(`${API}/me/`);
-                    setUser({ ...meRes.data.user, profile: meRes.data.profile });
+                    const updatedUser = { ...meRes.data.user, profile: meRes.data.profile };
+                    setUser(updatedUser);
+                    return updatedUser;
                 } catch {
                     localStorage.removeItem('access_token');
                     localStorage.removeItem('refresh_token');
                     clearAuthHeaders();
                     setUser(null);
+                    return null;
                 }
             } else {
                 setUser(null);
+                return null;
             }
         } finally {
             setLoading(false);

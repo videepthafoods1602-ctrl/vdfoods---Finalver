@@ -99,12 +99,37 @@ const styles = {
         gap: '12px',
         marginTop: '32px',
         boxShadow: '0 20px 40px rgba(92, 141, 55, 0.2)',
+    },
+    modalOverlay: {
+        position: 'fixed' as const,
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        backgroundColor: 'rgba(0,0,0,0.8)',
+        backdropFilter: 'blur(10px)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+        padding: '24px',
+    },
+    modalContent: {
+        backgroundColor: 'var(--color-surface)',
+        borderRadius: '40px',
+        maxWidth: '500px',
+        width: '100%',
+        padding: '48px',
+        textAlign: 'center' as const,
+        position: 'relative' as const,
+        border: '1px solid var(--color-border)',
+        boxShadow: '0 30px 60px rgba(0,0,0,0.2)',
     }
 };
 
 const CheckoutPage = () => {
     const { cartItems, cartTotal, clearCart, formatPrice, currency, locationData, updateQuantity, removeFromCart, addToCart } = useCart();
-    const { user, isLoggedIn, loading: authLoading, openAuthModal } = useAuth();
+    const { user, isLoggedIn, loading: authLoading, openAuthModal, refreshUser } = useAuth();
     const navigate = useNavigate();
 
     const parseWeight = (weightStr: string) => {
@@ -155,6 +180,7 @@ const CheckoutPage = () => {
     const [discountAmount, setDiscountAmount] = useState(0);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [orderSuccess, setOrderSuccess] = useState(false);
+    const [orderInfo, setOrderInfo] = useState<any>(null);
     const [favorites, setFavorites] = useState<any[]>([]);
 
     useEffect(() => {
@@ -237,55 +263,70 @@ const CheckoutPage = () => {
         }
     };
 
-    const handleAddAddress = async (e: React.FormEvent) => {
-        e.preventDefault();
+    const handleAddAddress = async (e?: React.FormEvent) => {
+        if (e) e.preventDefault();
         try {
+            const token = localStorage.getItem('access_token');
             const combinedAddress = newAddress.landmark ? `${newAddress.street_address}\nLandmark: ${newAddress.landmark}` : newAddress.street_address;
             const addressPayload = { ...newAddress };
             delete addressPayload.landmark;
 
-            await axios.post(`${API_URL}/accounts/addresses/`, {
+            const response = await axios.post(`${API_URL}/accounts/addresses/`, {
                 ...addressPayload,
                 street_address: combinedAddress,
                 address_type: 'shipping'
+            }, {
+                headers: { Authorization: `Bearer ${token}` }
             });
-            alert('Address added!');
+            
+            // Refresh user data to get the newly created address
+            const updatedUser = await refreshUser();
+            
+            // Auto-select the new address
+            const newId = response.data.id || response.data._id;
+            if (newId) {
+                setSelectedAddressId(newId);
+            } else if (updatedUser && updatedUser.profile?.addresses?.length > 0) {
+                const addresses = updatedUser.profile.addresses;
+                setSelectedAddressId(addresses[addresses.length - 1].id || addresses[addresses.length - 1]._id);
+            }
+            
             setIsAddingAddress(false);
-            window.location.reload(); 
+            return response.data;
         } catch (err) {
             alert('Failed to add address');
+            console.error('Add address error:', err);
+            throw err;
         }
     };
 
     const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-
-        if (!selectedAddressId && !isAddingAddress) {
-            alert('Please select or add a shipping address');
-            return;
-        }
+        if (e) e.preventDefault();
 
         try {
             const token = localStorage.getItem('access_token');
             let finalAddress = null;
 
-            // 1. If adding a new address, sync it to the profile first
+            // 1. If currently in "Add Address" mode, save it first
             if (isAddingAddress) {
-                const combinedAddress = newAddress.landmark ? `${newAddress.street_address}\nLandmark: ${newAddress.landmark}` : newAddress.street_address;
-                const addressPayload = { ...newAddress };
-                delete addressPayload.landmark;
-                
-                // Keep the created address data
-                await axios.post(`${API_URL}/accounts/addresses/`, {
-                    ...addressPayload,
-                    street_address: combinedAddress,
-                    address_type: 'shipping'
-                }, {
-                    headers: { Authorization: `Bearer ${token}` }
-                });
-                
-                finalAddress = { ...newAddress, street_address: combinedAddress, address_type: 'shipping' };
+                // Quick validation
+                if (!newAddress.full_name || !newAddress.phone || !newAddress.street_address) {
+                    alert('Please complete the address details.');
+                    return;
+                }
+                const savedAddressResponse = await handleAddAddress();
+                const combinedAddress = savedAddressResponse.street_address; 
+                finalAddress = { 
+                    ...newAddress, 
+                    street_address: combinedAddress, 
+                    address_type: 'shipping', 
+                    id: savedAddressResponse.id || savedAddressResponse._id 
+                };
             } else {
+                if (!selectedAddressId) {
+                    alert('Please select a shipping address');
+                    return;
+                }
                 finalAddress = addresses.find((a: any) => a.id === selectedAddressId || a._id === selectedAddressId);
             }
 
@@ -310,21 +351,20 @@ const CheckoutPage = () => {
             setIsSubmitting(true);
             const endpoint = isBulkOrder ? `${API_URL}/bulk-orders/` : `${API_URL}/orders/`;
             
-            await axios.post(endpoint, data, {
+            const response = await axios.post(endpoint, data, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
+            setOrderInfo(response.data);
             setOrderSuccess(true);
-            clearCart();
+            await clearCart(); // Ensure it's cleared before modal shows
             
-            // Redirect after delay
-            setTimeout(() => {
-                navigate('/account?tab=orders');
-            }, 3500);
-
         } catch (err: any) {
-            alert('Failed to place order:\n' + JSON.stringify(err.response?.data || err.message, null, 2));
-            console.error('Order Error:', err.response?.data || err);
+            if (err.response?.status === 400) {
+                alert('Order Error:\n' + JSON.stringify(err.response?.data, null, 2));
+            } else {
+                console.error('Order Error:', err.response?.data || err);
+            }
         } finally {
             setIsSubmitting(false);
         }
@@ -442,12 +482,13 @@ const CheckoutPage = () => {
                                             </div>
                                         </div>
                                     ) : (
-                                        <div style={{ textAlign: 'center', paddingTop: '10px', paddingBottom: '10px' }}>
+                                        <div style={{ textAlign: 'center', background: 'rgba(0,0,0,0.02)', border: '1px dashed var(--color-border)', borderRadius: '24px', padding: '40px' }}>
+                                            <MapPin size={48} color="var(--color-primary)" style={{ margin: '0 auto 16px', opacity: 0.3 }} />
                                             <p style={{ color: 'var(--color-text)', opacity: 0.6, fontSize: '14px', marginBottom: '16px' }}>No saved addresses found.</p>
                                             <button
                                                 type="button"
                                                 onClick={() => setIsAddingAddress(true)}
-                                                style={{ color: 'var(--color-primary)', background: 'none', border: 'none', fontWeight: 800, cursor: 'pointer' }}
+                                                style={{ color: 'var(--color-primary)', background: 'none', border: 'none', fontWeight: 800, cursor: 'pointer', fontSize: '16px' }}
                                             >
                                                 + Add Your First Address
                                             </button>
@@ -772,6 +813,77 @@ const CheckoutPage = () => {
                     </div>
                 </div>
             </div>
+            {orderSuccess && (
+                <div style={styles.modalOverlay}>
+                    <motion.div 
+                        initial={{ scale: 0.9, opacity: 0, y: 20 }}
+                        animate={{ scale: 1, opacity: 1, y: 0 }}
+                        style={{ ...styles.modalContent, padding: '64px 48px' }}
+                    >
+                        <motion.div 
+                            initial={{ scale: 0 }}
+                            animate={{ scale: 1 }}
+                            transition={{ type: "spring", stiffness: 200, damping: 15, delay: 0.2 }}
+                            style={{ 
+                                width: '100px', 
+                                height: '100px', 
+                                borderRadius: '100px', 
+                                backgroundColor: 'var(--color-primary)', 
+                                display: 'flex', 
+                                alignItems: 'center', 
+                                justifyContent: 'center',
+                                margin: '0 auto 32px',
+                                boxShadow: '0 20px 40px rgba(92, 141, 55, 0.3)'
+                            }}
+                        >
+                            <ShieldCheck size={50} color="white" />
+                        </motion.div>
+                        <h2 style={{ fontSize: '36px', fontWeight: 900, marginBottom: '16px', fontFamily: "'Playfair Display', serif" }}>
+                            Harvest Confirmed!
+                        </h2>
+                        <p style={{ color: 'var(--color-text)', opacity: 0.7, marginBottom: '32px', lineHeight: '1.6', fontSize: '16px' }}>
+                            Your order <strong style={{color: 'var(--color-primary)'}}>#{orderInfo?.order_number || 'N/A'}</strong> has been received by the village. Our manager will contact you shortly for payment and confirmation.
+                        </p>
+                        <div style={{ backgroundColor: 'rgba(0,0,0,0.02)', padding: '28px', borderRadius: '28px', marginBottom: '32px', textAlign: 'left' as const, border: '1px solid var(--color-border)' }}>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '12px', fontSize: '15px' }}>
+                                <span style={{ opacity: 0.6 }}>Final Harvest Total:</span>
+                                <span style={{ fontWeight: 900, color: 'var(--color-primary)' }}>{formatPrice(orderInfo?.total_amount || 0)}</span>
+                            </div>
+                            <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '15px' }}>
+                                <span style={{ opacity: 0.6 }}>Items Prepared:</span>
+                                <span style={{ fontWeight: 800 }}>{orderInfo?.items?.length || 0} Products</span>
+                            </div>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                            <button 
+                                onClick={() => navigate('/')}
+                                style={{ ...styles.orderBtn, marginTop: 0, padding: '24px' }}
+                            >
+                                <ArrowLeft size={20} /> Back to Village Home
+                            </button>
+                            <Link 
+                                to="/account?tab=orders"
+                                style={{ 
+                                    display: 'inline-flex', 
+                                    alignItems: 'center', 
+                                    justifyContent: 'center',
+                                    gap: '8px',
+                                    color: 'var(--color-text)', 
+                                    textDecoration: 'none', 
+                                    fontWeight: 700, 
+                                    fontSize: '15px',
+                                    opacity: 0.6,
+                                    transition: 'opacity 0.2s'
+                                }}
+                                onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
+                                onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
+                            >
+                                View Detailed Order Status <ChevronRight size={16} />
+                            </Link>
+                        </div>
+                    </motion.div>
+                </div>
+            )}
         </div>
     );
 };
