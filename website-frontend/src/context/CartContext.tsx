@@ -187,7 +187,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
         ));
     };
 
-    const clearCart = () => setCartItems([]);
+    const clearCart = async () => {
+        setCartItems([]);
+        if (user) {
+            await syncCart([]);
+        }
+    };
 
     const cartTotal = cartItems.reduce((acc, item) => acc + (item.price * item.quantity), 0);
     const cartCount = cartItems.reduce((acc, item) => acc + item.quantity, 0);
