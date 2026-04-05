@@ -112,11 +112,11 @@ export default function Home() {
                 >
                     <motion.div variants={fadeUpVariant} className="relative inline-block mb-10">
                         {/* Sweeping Leaf Animation Wrapper */}
-                        <div className="absolute top-0 left-0 w-full h-full pointer-events-none overflow-visible">
+                        <div className="absolute -top-8 -left-4 md:-top-12 md:-left-8 pointer-events-none overflow-visible">
                             <motion.div
-                                animate={{ rotate: [0, 10, 0], x: [0, 20, 0] }}
-                                transition={{ repeat: Infinity, duration: 3 }}
-                                className="w-10 h-10 text-[var(--color-secondary)] opacity-80"
+                                animate={{ rotate: [-5, 15, -5], x: [0, 15, 0], y: [0, -10, 0] }}
+                                transition={{ repeat: Infinity, duration: 4, ease: "easeInOut" }}
+                                className="w-10 h-10 md:w-16 md:h-16 text-[#4ea93b] opacity-90 drop-shadow-lg"
                             >
                                 <svg viewBox="0 0 24 24" fill="currentColor">
                                     <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z" />
@@ -124,11 +124,11 @@ export default function Home() {
                             </motion.div>
                         </div>
 
-                        <h2 className="font-serif text-5xl md:text-7xl lg:text-[5rem] font-black uppercase tracking-[6px] mb-3 drop-shadow-2xl text-[var(--color-secondary)]">
+                        <h2 className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-[5rem] font-black uppercase tracking-[2px] md:tracking-[6px] mb-3 drop-shadow-2xl text-[var(--color-secondary)]">
                             VIDEEPTHA FOODS
                         </h2>
                         <div 
-                            className="text-5xl md:text-6xl text-[#1a202c] tracking-[-1px] whitespace-nowrap mb-6 opactity-100 drop-shadow-md"
+                            className="text-3xl sm:text-4xl md:text-6xl text-[#1a202c] tracking-[-1px] mb-6 opacity-100 drop-shadow-md text-balance"
                             style={{ fontFamily: 'var(--font-namaste)', textTransform: 'none' }}
                         >
                             svastam prakrtham - snehitam
