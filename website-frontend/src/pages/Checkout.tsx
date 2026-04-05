@@ -286,9 +286,10 @@ const CheckoutPage = () => {
             const newId = response.data.id || response.data._id;
             if (newId) {
                 setSelectedAddressId(newId);
-            } else if (updatedUser && updatedUser.profile?.addresses?.length > 0) {
+            } else if (updatedUser?.profile?.addresses && updatedUser.profile.addresses.length > 0) {
                 const addresses = updatedUser.profile.addresses;
-                setSelectedAddressId(addresses[addresses.length - 1].id || addresses[addresses.length - 1]._id);
+                const lastAddr = addresses[addresses.length - 1];
+                setSelectedAddressId(lastAddr.id || lastAddr._id);
             }
             
             setIsAddingAddress(false);
@@ -875,8 +876,8 @@ const CheckoutPage = () => {
                                     opacity: 0.6,
                                     transition: 'opacity 0.2s'
                                 }}
-                                onMouseEnter={(e) => (e.currentTarget.style.opacity = '1')}
-                                onMouseLeave={(e) => (e.currentTarget.style.opacity = '0.6')}
+                                onMouseEnter={(e: React.MouseEvent<HTMLElement>) => (e.currentTarget.style.opacity = '1')}
+                                onMouseLeave={(e: React.MouseEvent<HTMLElement>) => (e.currentTarget.style.opacity = '0.6')}
                             >
                                 View Detailed Order Status <ChevronRight size={16} />
                             </Link>

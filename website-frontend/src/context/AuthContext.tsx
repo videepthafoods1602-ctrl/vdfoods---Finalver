@@ -36,7 +36,7 @@ interface AuthContextType {
     closeAuthModal: () => void;
     login: (accessToken: string, refreshToken: string, userData?: AuthUser) => void;
     logout: () => Promise<void>;
-    refreshUser: () => Promise<void>;
+    refreshUser: () => Promise<AuthUser | null>;
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
