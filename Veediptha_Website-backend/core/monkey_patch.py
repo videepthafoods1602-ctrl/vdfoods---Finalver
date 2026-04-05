@@ -57,6 +57,20 @@ def patch_mongodb_operations():
     except Exception as e:
         print(f"Failed to apply operations patch: {e}")
 
+def patch_auth_permissions():
+    """
+    Completely disable create_permissions during post_migrate.
+    django_mongodb_backend fails when creating content types in bulk because 
+    it doesn't return the PKs properly, making the instances unhashable or unsaved.
+    """
+    try:
+        import django.contrib.auth.management
+        # Override the function completely so that when the signal calls it, it does nothing
+        django.contrib.auth.management.create_permissions = lambda *args, **kwargs: None
+    except Exception as e:
+        print(f"Failed to patch auth permissions: {e}")
+
 # Apply patches
 patch_json_encoder()
 patch_mongodb_operations()
+patch_auth_permissions()

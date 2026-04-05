@@ -62,6 +62,36 @@ class Category(models.Model):
     def __str__(self):
         return self.name
 
+class MainCategory(models.Model):
+    id = ObjectIdAutoField(primary_key=True)
+    shop_type = models.CharField(max_length=50, default="Normal") # "Premium" or "Normal"
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True)
+    banner_image = models.CharField(max_length=500, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = 'main_categories'
+
+    def __str__(self):
+        return f"{self.shop_type} - {self.name}"
+
+class SubCategory(models.Model):
+    id = ObjectIdAutoField(primary_key=True)
+    main_category = models.ForeignKey(MainCategory, null=True, blank=True, on_delete=models.CASCADE, related_name='subcategories')
+    name = models.CharField(max_length=255)
+    slug = models.SlugField(unique=True)
+    thumbnail = models.CharField(max_length=500, blank=True, null=True)
+    is_active = models.BooleanField(default=True)
+    order = models.IntegerField(default=0)
+
+    class Meta:
+        db_table = 'sub_categories'
+
+    def __str__(self):
+        return self.name
+
 class Product(models.Model):
     id = ObjectIdAutoField(primary_key=True)
     name = models.CharField(max_length=255)
@@ -71,6 +101,7 @@ class Product(models.Model):
     stock = models.IntegerField()
     images = models.JSONField(default=list)
     category_ids = models.JSONField(default=list)
+    subcategory_id = models.CharField(max_length=100, blank=True, null=True)
     attributes = models.JSONField(default=dict)
     is_active = models.BooleanField(default=True)
 

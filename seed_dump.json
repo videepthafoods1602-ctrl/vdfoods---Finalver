@@ -1,0 +1,955 @@
+[
+    {
+        "shop": "VD's Store",
+        "categories": [
+            {
+                "name": "At Pocket",
+                "id": "69d0daa6dc28ef0d94d4fb8e",
+                "subcategories": [
+                    {
+                        "name": "Beat hunger",
+                        "id": "69d0daa6dc28ef0d94d4fb8f",
+                        "products": [
+                            "Energy bars",
+                            "Bars with muesli",
+                            "Peanut butter bar",
+                            "Pumpkin butter bar",
+                            "Crunchy peanut butter bar",
+                            "Peanut & pumpkin crunchy bar"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Baby Food",
+                "id": "69d0daa6dc28ef0d94d4fb90",
+                "subcategories": [
+                    {
+                        "name": "Kid's combo / Baby food",
+                        "id": "69d0daa6dc28ef0d94d4fb91",
+                        "products": [
+                            "Pancake mix",
+                            "Iron Rich",
+                            "Snickers",
+                            "Dark chacolate (Almond Dark Chocolate, Pista Dark Chocolate,Cashew Dark Chocolate, Dates Dark Chocolate, Mix Nuts Dates Dark Chocolate, Seeds Dark Chocolate, Mixed berries Dark Chocolate, Strawberry Dark Chocolate, Blueberry Dark Chocolate, Blackberry Dark Chocolate)",
+                            "Dryfruit crunchy snickers"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Biryani Mix",
+                "id": "69d0daa6dc28ef0d94d4fb92",
+                "subcategories": [],
+                "direct_products": [
+                    "Hydrabadi Biryani",
+                    "Methi Biryani",
+                    "VD's Special Biryani",
+                    "Coriander Biryani",
+                    "Chettinad Biryani"
+                ]
+            },
+            {
+                "name": "Body relax",
+                "id": "69d0daa6dc28ef0d94d4fb93",
+                "subcategories": [
+                    {
+                        "name": "Abhyanga Snana",
+                        "id": "69d0daa6dc28ef0d94d4fb94",
+                        "products": [
+                            "Body Bath Powder",
+                            "Hair pack",
+                            "Hair wash",
+                            "Hair softening",
+                            "Face wash",
+                            "Baby wash",
+                            "Body scrub",
+                            "Organic body washes & face wash"
+                        ]
+                    },
+                    {
+                        "name": "Hair & Massage oils",
+                        "id": "69d0daa6dc28ef0d94d4fb95",
+                        "products": [
+                            "Hair oil - Coconut oil"
+                        ]
+                    },
+                    {
+                        "name": "Hair oils & Massage oils",
+                        "id": "69d0daa6dc28ef0d94d4fb96",
+                        "products": [
+                            "Hair oil - Sesame oil",
+                            "Hair oil - Rosemary Coconut oil",
+                            "Hair oil - Mix Hair oil"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Candies",
+                "id": "69d0daa6dc28ef0d94d4fb97",
+                "subcategories": [
+                    {
+                        "name": "Candies & Chocolates",
+                        "id": "69d0daa6dc28ef0d94d4fb98",
+                        "products": [
+                            "Ginger candy",
+                            "Amla candy"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Cooking oil / Cold pressed oil",
+                "id": "69d0daa6dc28ef0d94d4fb99",
+                "subcategories": [
+                    {
+                        "name": "Cold pressed oil",
+                        "id": "69d0daa6dc28ef0d94d4fb9a",
+                        "products": [
+                            "Sesame oil",
+                            "Sunflower oil",
+                            "Coconut oil",
+                            "Groundnut oil"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Dark Chocolate",
+                "id": "69d0daa6dc28ef0d94d4fb9b",
+                "subcategories": [],
+                "direct_products": [
+                    "Almond Dark Chocolate",
+                    "Pista Dark Chocolate",
+                    "Cashew Dark Chocolate",
+                    "Dates Dark Chocolate",
+                    "Mix Nuts Dates Dark Chocolate",
+                    "Seeds Dark Chocolate",
+                    "Mixed berries Dark Chocolate",
+                    "Strawberry Dark Chocolate",
+                    "Blueberry Dark Chocolate",
+                    "Blackberry Dark Chocolate"
+                ]
+            },
+            {
+                "name": "DB Friendly (Diabetic friendly)",
+                "id": "69d0daa6dc28ef0d94d4fb9c",
+                "subcategories": [
+                    {
+                        "name": "Diabetic friendly",
+                        "id": "69d0daa6dc28ef0d94d4fb9d",
+                        "products": [
+                            "Gluten Free Roti",
+                            "Sajja Dry fruit laddu",
+                            "Millet Dry fruit laddu",
+                            "Dates Dry fruit laddu",
+                            "Jonna Dry fruit laddu",
+                            "Sugar Free Sweets"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "DryFruitSpecial",
+                "id": "69d0daa6dc28ef0d94d4fb9e",
+                "subcategories": [],
+                "direct_products": [
+                    "galic coated cashews",
+                    "masla cashews",
+                    "Garlic Karam cashews",
+                    "Pepper   cashews",
+                    "Dry chilli cahews",
+                    "Garlic Karam  almonds",
+                    "Garlic coated  almonds",
+                    "Garlic coated  pista",
+                    "Garlic coated  peanuts",
+                    "garlic coated makhanas",
+                    "masla almonds",
+                    "masla pista",
+                    "masla penuts",
+                    "masla makhanas",
+                    "Garlic Karam  pista",
+                    "Garlic Karam peanuts",
+                    "Garlic Karam makhanas",
+                    "Pepper  almonds",
+                    "Pepper  makhanas",
+                    "Pepper   pista",
+                    "Pepper   peanuts",
+                    "Dry chilli  almonds",
+                    "Dry chilli pista",
+                    "Dry chilli makhanas",
+                    "dryfruit laddu",
+                    "cocunut dryfruit laddu",
+                    "penut dryfruit laddo",
+                    "Millet Anjeer Rolls (Dryfruit Rolls)",
+                    "Dryfruit & Seeds laddu",
+                    "Moringa Dry fruits laddu",
+                    "Dry chilli peanuts"
+                ]
+            },
+            {
+                "name": "Energy Drinks",
+                "id": "69d0daa6dc28ef0d94d4fb9f",
+                "subcategories": [
+                    {
+                        "name": "Soup",
+                        "id": "69d0daa6dc28ef0d94d4fba0",
+                        "products": [
+                            "Millet Tomato Soup",
+                            "Millet lemon-coriander Soup",
+                            "Millet horsegram soup",
+                            "Millet Moringa soup",
+                            "Videeptha Special Soup",
+                            "Millet Vegetable Soup",
+                            "Moringa Multi Millet",
+                            "Veg leg goat Soup"
+                        ]
+                    },
+                    {
+                        "name": "Ganji",
+                        "id": "69d0daa6dc28ef0d94d4fba1",
+                        "products": [
+                            "Black Rice ganji",
+                            "red rice ganji",
+                            "urud dal ganji"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Gut Friendly",
+                "id": "69d0daa6dc28ef0d94d4fba2",
+                "subcategories": [
+                    {
+                        "name": "Gut friendly fruit drinks",
+                        "id": "69d0daa6dc28ef0d94d4fba3",
+                        "products": [
+                            "Pineapple-Cinnamon kanji"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Gut friendly fruit drinks",
+                "id": "69d0daa6dc28ef0d94d4fba4",
+                "subcategories": [],
+                "direct_products": [
+                    "Pineapple & Strawberry (Natural Fruit Soda (Non Carbonated drinks))",
+                    "Orange Fanta / orange wine",
+                    "Ginger Bug",
+                    "Hibiscus-Cinnamon pre-biotic soda",
+                    "Mixed fruit pre-biotic soda",
+                    "Strawberry - orange - Beetroot",
+                    "Kiwi Fizz",
+                    "Amla-Haldi Fizz kanji",
+                    "Mulberry-peach"
+                ]
+            },
+            {
+                "name": "Herbal Tea",
+                "id": "69d0daa6dc28ef0d94d4fba5",
+                "subcategories": [],
+                "direct_products": [
+                    "Herbal Tea With jaggery",
+                    "Herbal Tea Without jaggery",
+                    "Lemon zest Tea",
+                    "Orange Zest Tea",
+                    "Rose Tea",
+                    "Hibiscus Tea",
+                    "Ginger Tea",
+                    "Chamomile Tea",
+                    "Butterfly pea",
+                    "Avarampoo tea",
+                    "Wheat grass",
+                    "Lemongrass"
+                ]
+            },
+            {
+                "name": "Instant Chutneys & Podi's",
+                "id": "69d0daa6dc28ef0d94d4fba6",
+                "subcategories": [
+                    {
+                        "name": "Instant Chutney",
+                        "id": "69d0daa6dc28ef0d94d4fba7",
+                        "products": [
+                            "Peanut chutney",
+                            "Coconut Chutney",
+                            "Spicy onion chutney",
+                            "Tomato Chutney",
+                            "Coriander chutney",
+                            "Garlic chutney",
+                            "Ginger chutney",
+                            "Green coconut chutney",
+                            "Red coconut chutney",
+                            "Bell pepper chutney"
+                        ]
+                    },
+                    {
+                        "name": "Podi",
+                        "id": "69d0daa6dc28ef0d94d4fba8",
+                        "products": [
+                            "Idli spicy Podi",
+                            "Moringa podi",
+                            "Dal Moringa",
+                            "Horsegram Moringa",
+                            "Andhra spl Podi",
+                            "Onion peel powder",
+                            "Garlic peel powder",
+                            "Bittergourd spicy Powder",
+                            "Flax seeds powder",
+                            "Curry leaves powder",
+                            "Sesame podi",
+                            "Pudina podi",
+                            "Multivitamin spicy podi",
+                            "Moringa karam",
+                            "Nallerukaram podi",
+                            "Garlic karam",
+                            "Dry Coconut podi",
+                            "Urad channa dall spicy podi",
+                            "Sesame spicy podi",
+                            "sunflower spicy podi",
+                            "walermelon spicy podi",
+                            "Pumkin spicy podi",
+                            "Peanut podi"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Milk mix - dry fruit mix",
+                "id": "69d0daa6dc28ef0d94d4fba9",
+                "subcategories": [
+                    {
+                        "name": "Dry fruit Premium",
+                        "id": "69d0daa6dc28ef0d94d4fbaa",
+                        "products": [
+                            "Sajja Dry fruit laddu",
+                            "Millet Dry fruit laddu",
+                            "Dates Dry fruit laddu",
+                            "Jonna Dry fruit laddu"
+                        ]
+                    },
+                    {
+                        "name": "Instant milk mix",
+                        "id": "69d0daa7dc28ef0d94d4fbab",
+                        "products": [
+                            "Dryfruit Drink mix",
+                            "Ragi sprouts milk",
+                            "Ragi choco milk",
+                            "Ragi Dry fruit milk",
+                            "Makhana-Dry fruit milk",
+                            "Sprouted Ragi chocolate milk",
+                            "Dryfruit Milk Mix",
+                            "ABC Dryfruit Milk Mix"
+                        ]
+                    },
+                    {
+                        "name": "Instant milk mix & Dry fruit Premium",
+                        "id": "69d0daa7dc28ef0d94d4fbac",
+                        "products": [
+                            "Beetroot dryfruit milk mix"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Millet Rice Varieties",
+                "id": "69d0daa7dc28ef0d94d4fbad",
+                "subcategories": [
+                    {
+                        "name": "Rice Varieties",
+                        "id": "69d0daa7dc28ef0d94d4fbae",
+                        "products": [
+                            "Black Kuruvai Rice",
+                            "Forest Elephant Rice",
+                            "Black Rice",
+                            "Hand Pound Rice",
+                            "Red Rice"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Mix for Cooked Millet",
+                "id": "69d0daa7dc28ef0d94d4fbb3",
+                "subcategories": [],
+                "direct_products": [
+                    "Coconut Mix",
+                    "Curry leaves Mix"
+                ]
+            },
+            {
+                "name": "mouth freshner",
+                "id": "69d0daa7dc28ef0d94d4fbb4",
+                "subcategories": [],
+                "direct_products": [
+                    "natural mouth freshner"
+                ]
+            },
+            {
+                "name": "Our kitchen premium masalas",
+                "id": "69d0daa7dc28ef0d94d4fbb5",
+                "subcategories": [
+                    {
+                        "name": "home made masala",
+                        "id": "69d0daa7dc28ef0d94d4fbb6",
+                        "products": [
+                            "Garam Masala",
+                            "Sambar Powder",
+                            "Rasam Powder",
+                            "Daniya powder",
+                            "Turmeric powder",
+                            "Saunf powder",
+                            "Methi seeds powder",
+                            "Byadgi chilli powder",
+                            "Guntur chilli powder",
+                            "elaichi  powder( black elaichi,greenelaichi)",
+                            "Cinamon",
+                            "Bayleaf powder",
+                            "Ajwain powder",
+                            "Rosted jeera  powder",
+                            "Plain jeera powder",
+                            "Pickle Masala",
+                            "pepper powder",
+                            "Instant Mix - Sambhar",
+                            "Instant Mix - Rasam",
+                            "Instant Mix-Vatta  kolambu",
+                            "Instant MixHorsegram kolambu",
+                            "Instant Mix-pundu   kolambu",
+                            "Instant Mix-ulavula pulusu",
+                            "Chicken masala",
+                            "mutton masala"
+                        ]
+                    },
+                    {
+                        "name": "Vegetable Masala",
+                        "id": "69d0daa7dc28ef0d94d4fbb7",
+                        "products": [
+                            "Peanut Masala",
+                            "Magic Masala",
+                            "Gravy Masala",
+                            "Dry fry Masala"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Pickles",
+                "id": "69d0daa7dc28ef0d94d4fbb8",
+                "subcategories": [
+                    {
+                        "name": "Pickles Veg & Non Veg",
+                        "id": "69d0daa7dc28ef0d94d4fbb9",
+                        "products": [
+                            "VD's Special less oil & pickles",
+                            "VD's Spl. Sundried pickle",
+                            "VD's Spl. less masala-free pickle"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Premium Roti",
+                "id": "69d0daa7dc28ef0d94d4fbba",
+                "subcategories": [],
+                "direct_products": [
+                    "Multigrain Roti",
+                    "Multi Millet Roti",
+                    "Sprouted Multi Millet Roti",
+                    "Khapli, Khapli - Multi Millet Seeds Roti",
+                    "Khapli - Multigrain & Seeds Roti",
+                    "Khapli - Masala Atta Roti",
+                    "Khapli - Moringa Atta Roti",
+                    "Rajgira - Amaranth Rajgira Roti",
+                    "Khapli - Seeds Roti",
+                    "Khapli - Nuts Roti",
+                    "Khapli Pearl Millets Roti",
+                    "Khapli - Jowar Roti"
+                ]
+            },
+            {
+                "name": "Pulao Mix",
+                "id": "69d0daa7dc28ef0d94d4fbbb",
+                "subcategories": [],
+                "direct_products": [
+                    "Classic Vegetable Pulao Mix",
+                    "Green Peas (Matar) Pulao Mix",
+                    "VD's spl Pulao mix",
+                    "Mixed Veg Masala Pulao Mix",
+                    "Palak (Spinach) Pulao Mix",
+                    "Mushroom Pulao Mix",
+                    "Paneer Pulao Mix",
+                    "Soya Chunk Pulao Mix",
+                    "High Protein Veg Pulao Mix",
+                    "Chickpea (Chana) Pulao Mix",
+                    "Methi (Fenugreek) Pulao Mix"
+                ]
+            },
+            {
+                "name": "Ready to cook",
+                "id": "69d0daa8dc28ef0d94d4fbbc",
+                "subcategories": [
+                    {
+                        "name": "Feel good, feel lite",
+                        "id": "69d0daa8dc28ef0d94d4fbbd",
+                        "products": [
+                            "Ghee pongal( kodo pongal, little millet pongal)",
+                            "Pongal( kodo pongal, little millet)",
+                            "Palak dal kichdi",
+                            "VD spl. Pongal",
+                            "BisiBele Bath",
+                            "Black rice idli mix",
+                            "Multi Millet Idli mix",
+                            "Foxtail Millet Idli mix",
+                            "Little Millet Idli mix",
+                            "Kodo Millet Idli mix",
+                            "Barnyard Millet Idli mix",
+                            "Proso Millet Idli mix",
+                            "Ragi Idli mix",
+                            "Bajra Idli mix",
+                            "Jowar Idli mix",
+                            "Red rice idli mix",
+                            "Black rice idli mix",
+                            "Moong dal dosa mix",
+                            "Pesarattu mix",
+                            "Multi millet dosa mix",
+                            "Foxtail Millet Dosa mix",
+                            "Little Millet Dosa mix",
+                            "Kodo Millet Dosa mix",
+                            "Barnyard Millet Dosa mix",
+                            "Proso Millet Dosa mix",
+                            "Ragi Dosa mix",
+                            "Bajra Dosa mix",
+                            "Jowar Dosa mix",
+                            "Horsegram-Millet dosa mix",
+                            "Channa- Millet dosa mix",
+                            "All pulses mix Millet dosa mix",
+                            "Moong dal kichdi",
+                            "Mix dal kichdi",
+                            "Garlic - palak kichdi",
+                            "South spl Ground spices kichdi",
+                            "black rice dosa mix",
+                            "barley dosa mix",
+                            "rava dosa mix",
+                            "Black rice puttu powder",
+                            "Red rice puttu powder",
+                            "Jowar puttu mix",
+                            "Masoor dal kichdi",
+                            "Methi kichdi",
+                            "Palak-corn dal kichdi",
+                            "black rice-proso dosa",
+                            "Ragi-moongdal dosa",
+                            "Ragi-green gram dosa",
+                            "urud dal vada mix",
+                            "upma mix",
+                            "Little Millet Pasta",
+                            "moringa-Little Millet Pasta",
+                            "Jowar Millet pasta",
+                            "Jowar Moringa pasta",
+                            "Little Millet Noodles",
+                            "Moringa Little Millet Noodles",
+                            "Moringa jowar Noodles",
+                            "Mix millet noodles",
+                            "Ragi vermicelli",
+                            "Jowar vermicelli",
+                            "black rice vermicelli",
+                            "red rice vermicelli",
+                            "Little millet vermicelli",
+                            "kodo vermicelli",
+                            "barnyard vermicelli",
+                            "proso vermicelli",
+                            "pearl vermicelli",
+                            "foxtail vermicelli",
+                            "Masala mix dal kichdi"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Ready to eat",
+                "id": "69d0daa8dc28ef0d94d4fbbe",
+                "subcategories": [
+                    {
+                        "name": "museli",
+                        "id": "69d0daa8dc28ef0d94d4fbbf",
+                        "products": [
+                            "Berries muesli",
+                            "Muesli - Blue berry muesli",
+                            "Muesli - Strawberry muesli",
+                            "Muesli - Blackberry muesli",
+                            "Muesli - Nuts muesli"
+                        ]
+                    },
+                    {
+                        "name": "Traditional Diabetic Friendly Sweets",
+                        "id": "69d0daa8dc28ef0d94d4fbc3",
+                        "products": [
+                            "dryfruit laddu",
+                            "cocunut dryfruit laddu",
+                            "penut dryfruit laddo",
+                            "Millet Anjeer Rolls (Dryfruit Rolls)",
+                            "Dryfruit & Seeds laddu",
+                            "Moringa Dry fruits laddu",
+                            "Foxtail laddu",
+                            "Ragi laddu",
+                            "Combo box(Moong Laddu, Jowar Laddu, Omega Laddu, Popped Bajra Laddu, Popped Jowar Laddu)",
+                            "Omega laddu",
+                            "Popped Bajra laddu",
+                            "Popped Jawar laddu",
+                            "Moong laddu",
+                            "Jowar laddu",
+                            "DarkChacolate (Almond Dark Chocolate, Pista Dark Chocolate,Cashew Dark Chocolate, Dates Dark Chocolate, Mix Nuts Dates Dark Chocolate, Seeds Dark Chocolate, Mixed berries Dark Chocolate, Strawberry Dark Chocolate, Blueberry Dark Chocolate, Blackberry Dark Chocolate)",
+                            "Sajje laddu"
+                        ]
+                    },
+                    {
+                        "name": "Traditional Savouries",
+                        "id": "69d0daa8dc28ef0d94d4fbc4",
+                        "products": [
+                            "Nippattu (Millet palakura nippattu, Udalu nippattu, little millet nippattu, pearl millet nippattu,,kodo millet nippattu,)",
+                            "Chakli (Ragi chakli, Korra karepusa, Karivepaku Samalu chakli, Palak samalu, Samalu chakli,Mixed, Moringa chakli mix, Jowar, Bajra, Little millet chakli, Kodo chakli, Mixture)"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Ready to Mix",
+                "id": "69d0daa8dc28ef0d94d4fbc8",
+                "subcategories": [
+                    {
+                        "name": "Flours",
+                        "id": "69d0daa8dc28ef0d94d4fbc9",
+                        "products": [
+                            "Horsegram flour",
+                            "Green gram flour",
+                            "Soyabean flour",
+                            "Black urad flour",
+                            "Barley flour",
+                            "Whole Rajgira / Amaranth flour",
+                            "Quinoa flour",
+                            "Buckwheat flour",
+                            "Kapli flour",
+                            "Soaked Activated Ragi flour"
+                        ]
+                    },
+                    {
+                        "name": "Rava",
+                        "id": "69d0daa8dc28ef0d94d4fbcc",
+                        "products": [
+                            "Kodo Rava",
+                            "Bajra Rava"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Spreads",
+                "id": "69d0daa8dc28ef0d94d4fbcf",
+                "subcategories": [
+                    {
+                        "name": "sweet spreads",
+                        "id": "69d0daa8dc28ef0d94d4fbd0",
+                        "products": [
+                            "Orange zest jam",
+                            "Mixed berries jam"
+                        ]
+                    },
+                    {
+                        "name": "Mayonnaise",
+                        "id": "69d0daa8dc28ef0d94d4fbd3",
+                        "products": [
+                            "Garlic Mayo"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "spreads",
+                "id": "69d0daa8dc28ef0d94d4fbd1",
+                "subcategories": [
+                    {
+                        "name": "Vegan butter",
+                        "id": "69d0daa8dc28ef0d94d4fbd2",
+                        "products": [
+                            "Peanut butter",
+                            "Crunchy Peanut butter",
+                            "Pumpkin seed",
+                            "Almond nut butter",
+                            "Cashew butter"
+                        ]
+                    },
+                    {
+                        "name": "Vegan Mayonnaise",
+                        "id": "69d0daa8dc28ef0d94d4fbd4",
+                        "products": [
+                            "panner-Cauliflower mayonnaise"
+                        ]
+                    },
+                    {
+                        "name": "Vegan Sause",
+                        "id": "69d0daa8dc28ef0d94d4fbd5",
+                        "products": [
+                            "Mustard"
+                        ]
+                    },
+                    {
+                        "name": "Sause",
+                        "id": "69d0daa8dc28ef0d94d4fbd6",
+                        "products": [
+                            "Schezwan Sauce"
+                        ]
+                    }
+                ]
+            }
+        ]
+    },
+    {
+        "shop": "VD's Premium Store",
+        "categories": [
+            {
+                "name": "Millet Rice Varieties",
+                "id": "69d0daa7dc28ef0d94d4fbaf",
+                "subcategories": [
+                    {
+                        "name": "Rice Varieties",
+                        "id": "69d0daa7dc28ef0d94d4fbb0",
+                        "products": [
+                            "Mapilai Samba Rice",
+                            "Idli Rice",
+                            "IR 20 Idli Rice",
+                            "IR Raw Rice",
+                            "Kullakar Rice",
+                            "Kichili Samba Rice",
+                            "Thooyamalli Rice",
+                            "Aruvatham Kuruvai Rice",
+                            "Poongar Rice",
+                            "Hand-Pound Ponni Parboiled Rice",
+                            "Bamboo Rice"
+                        ]
+                    },
+                    {
+                        "name": "Millets",
+                        "id": "69d0daa7dc28ef0d94d4fbb1",
+                        "products": [
+                            "Sorghum Millet",
+                            "Pearl Millet",
+                            "Finger Millet",
+                            "Foxtail Millet",
+                            "Little Millet",
+                            "Kodo Millet",
+                            "Barnyard Millet",
+                            "Proso Millet",
+                            "Browntop Millet",
+                            "Semi-polished Foxtail Millet",
+                            "Semi-polished Little Millet",
+                            "Semi-polished Kodo Millet",
+                            "Semi-polished Barnyard Millet",
+                            "Semi-polished Browntop Millet"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Mix for Cooked Millet",
+                "id": "69d0daa7dc28ef0d94d4fbb2",
+                "subcategories": [],
+                "direct_products": [
+                    "VangiBath",
+                    "Tomato Pachadi",
+                    "Garlic Kaaram",
+                    "Coriander Pachadi",
+                    "Garlic Coriander Kaaram",
+                    "Pudina Kaaram"
+                ]
+            },
+            {
+                "name": "Ready to eat",
+                "id": "69d0daa8dc28ef0d94d4fbc0",
+                "subcategories": [
+                    {
+                        "name": "museli",
+                        "id": "69d0daa8dc28ef0d94d4fbc1",
+                        "products": [
+                            "Seeds muesli",
+                            "Museli- choclate",
+                            "Combined muesli",
+                            "mixed berries museli",
+                            "Dry fruits museli",
+                            "Dry fruits-berries museli",
+                            "VD spl. Museli"
+                        ]
+                    },
+                    {
+                        "name": "Traditional Diabetic Friendly Sweets",
+                        "id": "69d0daa8dc28ef0d94d4fbc2",
+                        "products": [
+                            "Kajjikayyi (Jonna-Dryfruit, Jonna-Sesame, Jonna-Coconut, VP Special KajjiKai, Kapli-Dryfruit, Kapli-Sesame, Kapli-Coconut, VP Special Kapli KajjiKai)",
+                            "Arisalu/Adhirasam (AriKelu Arisalu, Ghee AriKelu Arisalu, Ghee Red Rice Arisalu, Red Rice Arisalu)",
+                            "Omega Rich Milk powder",
+                            "Omega Rich laddoo",
+                            "Iron Rich laddoo",
+                            "Gond laddu",
+                            "Foxtail urud dal laddu(sunnundalu)",
+                            "Sattu laddu",
+                            "Black urud dal (Minapa Sunnundalu)",
+                            "Black sesame laddu",
+                            "Jonna laddu",
+                            "Flaxseed laddu",
+                            "Dry coconut laddu",
+                            "Sprouted Ragi laddu",
+                            "Korra Bondi laddu",
+                            "Peanut laddu, sesame laddu",
+                            "Besan laddu"
+                        ]
+                    },
+                    {
+                        "name": "Traditional Savouries",
+                        "id": "69d0daa8dc28ef0d94d4fbc5",
+                        "products": [
+                            "Mixture (Red Rice Mixture, Jonna mixture, Navaratna Mixture)",
+                            "curry leaves powder"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Ready to Mix",
+                "id": "69d0daa8dc28ef0d94d4fbc6",
+                "subcategories": [
+                    {
+                        "name": "Flours",
+                        "id": "69d0daa8dc28ef0d94d4fbc7",
+                        "products": [
+                            "Ragi flour",
+                            "Bajra flour",
+                            "Jowar flour",
+                            "Besan flour",
+                            "Soaked Activated Jowar flour",
+                            "Soaked Activated Pearl Millet flour",
+                            "Soaked Activated Multi Grain flour",
+                            "Soaked Activated Red Rice flour",
+                            "Soaked Activated Black Rice Flour",
+                            "Soaked Activated  All Millet flour",
+                            "Sprouted Ragi Flour",
+                            "Sprouted Horsegram Flour",
+                            "Sprouted Brown chana Flour",
+                            "Sprouted Soya bean Flour",
+                            "Sprouted Black urud dal Flour",
+                            "Sprouted Greengram Flour",
+                            "Sprouted Bajra Flour",
+                            "Sprouted Jowar Flour",
+                            "Sprouted  Rajgira Flour",
+                            "Sprouted Buckwheat Flour",
+                            "Sprouted Millet Flour",
+                            "Sprouted Emmer/khapli Flour",
+                            "Almond flour",
+                            "Red Rice Flour",
+                            "Brown Rice Flour",
+                            "Black Rice Flour",
+                            "Gluten free Quinoa Flour",
+                            "Gluten free Barnyard Flour",
+                            "Gluten free Amaranth Flour",
+                            "Gluten free Kodo millet Flour"
+                        ]
+                    },
+                    {
+                        "name": "Poha",
+                        "id": "69d0daa8dc28ef0d94d4fbca",
+                        "products": [
+                            "jowar poha",
+                            "Foxtail Poha",
+                            "Kodo Poha",
+                            "Bajra Poha",
+                            "Ragi Poha",
+                            "Red Rice Poha"
+                        ]
+                    },
+                    {
+                        "name": "Rava",
+                        "id": "69d0daa8dc28ef0d94d4fbcb",
+                        "products": [
+                            "Little Millet Rava",
+                            "Foxtail Rava",
+                            "Jowar Rava",
+                            "Barnyard Rava",
+                            "Khapli Rava"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Spreads",
+                "id": "69d0daa8dc28ef0d94d4fbcd",
+                "subcategories": [
+                    {
+                        "name": "sweet spreads",
+                        "id": "69d0daa8dc28ef0d94d4fbce",
+                        "products": [
+                            "Orange jam",
+                            "Blueberry jam",
+                            "Strawberry jam",
+                            "Mixed fruit jam"
+                        ]
+                    }
+                ]
+            },
+            {
+                "name": "Tools",
+                "id": "69d0daa8dc28ef0d94d4fbd7",
+                "subcategories": [],
+                "direct_products": [
+                    "Ragi ball stick",
+                    "Clay pots"
+                ]
+            },
+            {
+                "name": "VD's  Premium Special",
+                "id": "69d0daa8dc28ef0d94d4fbd8",
+                "subcategories": [],
+                "direct_products": [
+                    "VD's Museli",
+                    "Immunity Booster",
+                    "Herbal Masala Tea",
+                    "Bisibele Bath",
+                    "Pongal",
+                    "Biryani Mix",
+                    "Tomato Bath Mix",
+                    "Pulavo Mix",
+                    "Kokam Puliogare",
+                    "VD's Special Pudi",
+                    "Jonna Kajjikai",
+                    "Kapli Kajjikai",
+                    "Pickle Masala",
+                    "Moong Dal Dosa Mix",
+                    "Millet Payasam",
+                    "Black urud dal Payasam",
+                    "Dark Chocalate (Almond Dark Chocolate, Pista Dark Chocolate,Cashew Dark Chocolate, Dates Dark Chocolate, Mix Nuts Dates Dark Chocolate, Seeds Dark Chocolate, Mixed berries Dark Chocolate, Strawberry Dark Chocolate, Blueberry Dark Chocolate, Blackberry Dark Chocolate)",
+                    "Onion peel powder",
+                    "Garlic peel podi",
+                    "Adhirasam/Aresalu"
+                ]
+            },
+            {
+                "name": "Women's Friendly",
+                "id": "69d0daa8dc28ef0d94d4fbd9",
+                "subcategories": [
+                    {
+                        "name": "Women friendly / Periods friendly",
+                        "id": "69d0daa8dc28ef0d94d4fbda",
+                        "products": [
+                            "Sesame ladoo",
+                            "Flax seeds ladoo",
+                            "Lemon zest Tea",
+                            "Pumpkin butter",
+                            "Palak Dosa mix / green leaf dosa",
+                            "Ginger Candy (Digestion Friendly)",
+                            "Amla Candy (Digestion Friendly)",
+                            "Bloating Friendly"
+                        ]
+                    }
+                ]
+            }
+        ]
+    }
+]

@@ -1,6 +1,7 @@
 import { BrowserRouter as Router, Routes, Route } from 'react-router-dom';
 import { GoogleOAuthProvider } from '@react-oauth/google';
 import Home from './pages/Home';
+import HomeAlt from './pages/HomeAlt';
 import SlurrpHome from './pages/SlurrpHome';
 import ProductsPage from './pages/ProductsPage';
 import ProductDetailPage from './pages/ProductDetailPage';
@@ -39,6 +40,7 @@ function App() {
                 <div className="pb-24 lg:pb-0"> {/* Add padding for bottom nav on mobile */}
                     <Routes>
                       <Route path="/" element={<Home />} />
+                      <Route path="/home-alt" element={<HomeAlt />} />
                       <Route path="/slurrp-home" element={<SlurrpHome />} />
                       <Route path="/market-explorer" element={<MarketExplorer />} />
                       <Route path="/categories" element={<CategoriesPage />} />

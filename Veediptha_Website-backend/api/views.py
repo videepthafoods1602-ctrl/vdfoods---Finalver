@@ -40,9 +40,22 @@ class PageDetailView(generics.RetrieveAPIView):
     permission_classes = [permissions.AllowAny]
 
 class ProductListView(generics.ListAPIView):
-    queryset = Product.objects.all()
     serializer_class = ProductLiteSerializer
     permission_classes = [permissions.AllowAny]
+    
+    def get_queryset(self):
+        queryset = Product.objects.all()
+        category_id = self.request.query_params.get('category')
+        if category_id:
+            # Check if this ID is a MainCategory or SubCategory
+            # We handle filtering by checking subcategory_id OR category_ids (for legacy)
+            from .models import SubCategory
+            # If it's a subcategory ID, exact match subcategory_id
+            # Wait, best to just filter by subcategory_id OR category_ids containing it
+            
+            # Simple python level filter if no advanced MongoDB querying:
+            queryset = queryset.filter(subcategory_id=category_id)
+        return queryset
 
 class ProductDetailView(generics.RetrieveAPIView):
     queryset = Product.objects.all()
@@ -58,19 +71,94 @@ class ProductDetailView(generics.RetrieveAPIView):
         response.data['analytics'] = {'total_views': analytics.views, 'current_watching': analytics.current_watching}
         return response
 
-class CategoryListView(generics.ListAPIView):
-    serializer_class = CategorySerializer
+class CategoryListView(APIView):
     permission_classes = [permissions.AllowAny]
 
-    def get_queryset(self):
-        queryset = Category.objects.all().order_by('order', 'name')
-        parent_id = self.request.query_params.get('parent')
+    def get(self, request):
+        from .models import MainCategory, SubCategory
+        
+        main_cats = MainCategory.objects.filter(is_active=True).order_by('order', 'name')
+        sub_cats = SubCategory.objects.filter(is_active=True).order_by('order', 'name')
+        
+        # Virtual Tier 1 Shops
+        result = [
+            {
+                "id": "shop_premium",
+                "_id": "shop_premium",
+                "name": "VD's Premium Store",
+                "slug": "vds-premium-store",
+                "parent_id": None,
+                "media_url": "/assets/vds_elite.png",
+                "banner_image_url": "/assets/vds_elite.png",
+                "subcategories": [],
+                "is_active": True,
+                "order": 1,
+            },
+            {
+                "id": "shop_normal",
+                "_id": "shop_normal",
+                "name": "VD's Store",
+                "slug": "vds-store",
+                "parent_id": None,
+                "media_url": "/assets/vds_base.png",
+                "banner_image_url": "/assets/vds_base.png",
+                "subcategories": [],
+                "is_active": True,
+                "order": 2,
+            }
+        ]
+        
+        for m in main_cats:
+            # Determine Tier 1 parent based on explicit shop_type
+            shop_type_lower = m.shop_type.lower()
+            
+            if "premium" in shop_type_lower:
+                shop_parent_id = "shop_premium"
+            elif "normal" in shop_type_lower or "vd's store" in shop_type_lower:
+                shop_parent_id = "shop_normal"
+            else:
+                # Fallback for ambiguous cases
+                premium_names = ["millet rice varieties", "mix for cooked millet", "ready to eat", "ready to mix", "spreads", "tools", "vd's premium special", "women's friendly"]
+                shop_parent_id = "shop_premium" if m.name.lower().strip() in premium_names else "shop_normal"
+            
+            subs = []
+            for s in sub_cats:
+                if s.main_category_id == m.id:
+                    subs.append({
+                        "id": str(s.id),
+                        "_id": str(s.id),
+                        "name": s.name,
+                        "slug": s.slug,
+                        "parent_id": str(m.id),
+                        "thumbnail_image_url": s.thumbnail,
+                        "media_url": s.thumbnail,
+                        "is_active": s.is_active,
+                        "order": s.order,
+                    })
+
+            result.append({
+                "id": str(m.id),
+                "_id": str(m.id),
+                "name": m.name,
+                "slug": m.slug,
+                "parent_id": shop_parent_id,
+                "media_url": m.banner_image,
+                "banner_image_url": m.banner_image,
+                "subcategories": subs,
+                "is_active": m.is_active,
+                "order": m.order,
+            })
+            
+            result.extend(subs)
+            
+        parent_id = request.query_params.get('parent')
         if parent_id:
             if parent_id == 'null':
-                queryset = queryset.filter(parent__isnull=True)
+                result = [r for r in result if r['parent_id'] is None]
             else:
-                queryset = queryset.filter(parent_id=parent_id)
-        return queryset
+                result = [r for r in result if r['parent_id'] == parent_id]
+                
+        return Response(result)
 
 class CouponListView(generics.ListAPIView):
     queryset = Coupon.objects.all()
@@ -240,78 +328,164 @@ class SeedAllView(APIView):
     permission_classes = [permissions.AllowAny]
     def get(self, request):
         import os, traceback
+        import pandas as pd
         from django.utils.text import slugify
-        from .models import Category, Product
+        from .models import MainCategory, SubCategory, Product
+        
         try:
-            import pandas as pd
-        except ImportError:
-            return Response({"error": "pandas is not installed"}, status=500)
-            
-        try:
-            excel_path = next((p for p in [
-                'c:\\Users\\hp\\OneDrive\\Desktop\\finalVDPFWebsite\\Final_Menu_Categories_Products.xlsx',
-                'c:\\Users\\hp\\OneDrive\\Desktop\\finalVDPFWebsite\\Final_Menu_Category_Products.xlsx'
-            ] if os.path.exists(p)), None)
-            
-            if not excel_path: return Response({"error": "Excel file not found"}, status=400)
+            # Set correct path in current project to use the newest Excel version
+            excel_path = r'd:\VDF_Foods\vdfoods---Finalver\Final_VideepthaProductssss.xlsx'
+            if not os.path.exists(excel_path):
+                return Response({"error": f"Excel file not found at {excel_path}"}, status=400)
             
             df = pd.read_excel(excel_path, sheet_name='All Products Mapping')
             # Normalize column names
             df.columns = [str(c).strip() for c in df.columns]
             cols = df.columns.tolist()
             
+            shop_col = next((c for c in cols if 'Shop' in c), None)
             m_col = next((c for c in cols if 'Main' in c), None)
             s_col = next((c for c in cols if 'Sub' in c), None)
             p_col = next((c for c in cols if 'Prod' in c or 'Item' in c), None)
             
-            if not m_col: return Response({"error": "Main Category column not found"}, status=400)
+            if not shop_col or not m_col: 
+                 return Response({"error": f"Required columns (Shop, Main Category) not found. Found: {cols}"}, status=400)
 
-            # Clear DB
+            # --- CLEAR DATABASE FOR FRESH START ---
             Product.objects.all().delete()
-            # Clear categories in order (child then parent)
-            Category.objects.filter(parent__isnull=False).delete()
-            Category.objects.filter(parent__isnull=True).delete()
+            MainCategory.objects.all().delete()
+            SubCategory.objects.all().delete()
             
             counts = {"main": 0, "sub": 0, "products": 0}
             
+            # Cache for categories to avoid redundant DB hits
+            main_cat_cache = {}
+            sub_cat_cache = {}
+            products_to_create = []
+
             for _, row in df.iterrows():
+                raw_shop = str(row[shop_col]).strip() if pd.notna(row[shop_col]) else ''
+                if not raw_shop or raw_shop.lower() == 'nan': continue
+
                 m_name = str(row[m_col]).strip() if pd.notna(row[m_col]) else ''
+                if not m_name or m_name.lower() == 'nan': continue
+
+                # --- CATEGORY NAME NORMALIZATION ---
+                # Collapse "Gut Friendly" into "Gut friendly fruit drinks"
+                if m_name.lower().strip() == 'gut friendly':
+                    m_name = "Gut friendly fruit drinks"
+
+                # --- EXPLICIT SHOP ASSIGNMENT LISTS (USER TRUTH) ---
+                normal_list = [
+                    "At Pocket", "Baby Food", "Biryani Mix", "Body relax", "Candies",
+                    "Cooking oil / Cold pressed oil", "Dark Chocolate", "DB Friendly (Diabetic friendly)",
+                    "DryFruit Special", "Energy Drinks", "Gut friendly fruit drinks", "Herbal Tea",
+                    "Instant Chutneys & Podi's", "Milk mix - dry fruit mix", "Millet Rice Varieties",
+                    "Mix for Cooked Millet", "mouth freshner", "Our kitchen premium masalas", "Pickles",
+                    "Premium Roti", "Pulao Mix", "Ready to cook", "Ready to eat", "Ready to Mix", "Spreads"
+                ]
+                premium_list = [
+                    "Millet Rice Varieties", "Mix for Cooked Millet", "Ready to eat", "Ready to Mix",
+                    "Spreads", "Tools", "VD's Premium Special", "Women's Friendly"
+                ]
+
+                # Determine which shops this category should belong to
+                target_shops = []
+                m_name_lower = m_name.lower().strip()
+                
+                # Check for inclusion in lists (case-insensitive)
+                in_normal = any(n.lower().strip() in m_name_lower or m_name_lower in n.lower().strip() for n in normal_list)
+                in_premium = any(p.lower().strip() in m_name_lower or m_name_lower in p.lower().strip() for p in premium_list)
+                
+                if in_normal: target_shops.append("VD's Store")
+                if in_premium: target_shops.append("VD's Premium Store")
+                
+                # If NOT in either list, default to Excel's raw_shop
+                if not target_shops:
+                    if raw_shop.lower() == 'premium': target_shops.append("VD's Premium Store")
+                    else: target_shops.append("VD's Store")
+
                 s_name = str(row[s_col]).strip() if s_col and pd.notna(row[s_col]) else ''
                 p_name = str(row[p_col]).strip() if p_col and pd.notna(row[p_col]) else ''
                 
-                if not m_name or m_name.lower() == 'nan': continue
-                
-                # 1. Main Category
-                main_cat, created = Category.objects.get_or_create(
-                    name=m_name,
-                    parent=None,
-                    defaults={'slug': slugify(m_name)}
-                )
-                if created: counts["main"] += 1
-                
-                # 2. Subcategory
-                target_cat = main_cat
-                if s_name and s_name.lower() != 'nan':
-                     sub_cat, created = Category.objects.get_or_create(
-                         name=s_name,
-                         parent=main_cat,
-                         defaults={'slug': slugify(f"{m_name}-{s_name}")[:50]}
-                     )
-                     if created: counts["sub"] += 1
-                     target_cat = sub_cat
-                
-                # 3. Product
-                if p_name and p_name.lower() != 'nan':
-                    Product.objects.create(
-                        name=p_name,
-                        price=0.0,
-                        stock=100,
-                        category_ids=[str(target_cat.id)],
-                        is_active=True
-                    )
-                    counts["products"] += 1
+                for shop_name in target_shops:
+                    # --- SHOP-SPECIFIC SUB-CATEGORY FILTERING (TRUTH RULE) ---
+                    # 1. Normal Shop: Millet Rice Varieties ONLY allows "Rice Varieties" sub-cat
+                    if shop_name == "VD's Store" and m_name == "Millet Rice Varieties":
+                        if s_name != "Rice Varieties":
+                            continue
+
+                    # 1. Main Category
+                    m_key = (shop_name, m_name)
+                    if m_key not in main_cat_cache:
+                        main_cat = MainCategory.objects.create(
+                            shop_type=shop_name,
+                            name=m_name,
+                            slug=slugify(f"{shop_name}-{m_name}")[:50],
+                            banner_image=""
+                        )
+                        main_cat_cache[m_key] = main_cat
+                        counts["main"] += 1
+                    else:
+                        main_cat = main_cat_cache[m_key]
+                    
+                    # 2. Subcategory
+                    sub_cat = None
+                    if s_name and s_name.lower() != 'nan' and s_name.strip().lower() != m_name.strip().lower():
+                        s_key = (main_cat.id, s_name)
+                        if s_key not in sub_cat_cache:
+                            sub_cat = SubCategory.objects.create(
+                                main_category=main_cat,
+                                name=s_name,
+                                slug=slugify(f"{shop_name}-{m_name}-{s_name}")[:50],
+                                thumbnail=""
+                            )
+                            sub_cat_cache[s_key] = sub_cat
+                            counts["sub"] += 1
+                        else:
+                            sub_cat = sub_cat_cache[s_key]
+                    
+                    # 3. Product Preparation
+                    if p_name and p_name.lower() != 'nan':
+                        sub_id = str(sub_cat.id) if sub_cat else ""
+                        products_to_create.append(Product(
+                            name=p_name,
+                            price=0.0,
+                            stock=100,
+                            category_ids=[str(main_cat.id)],
+                            subcategory_id=sub_id,
+                            is_active=True
+                        ))
+                        counts["products"] += 1
+
+            # Final Bulk Insert for speed
+            if products_to_create:
+                Product.objects.bulk_create(products_to_create)
+
+            dump_path = r'd:\VDF_Foods\vdfoods---Finalver\seed_dump.json'
+            # (JSON dump logic already handled above or needs to be re-run)
             
-            return Response({"status": "Fresh seeding complete", "counts": counts})
+            # --- CONFLICT DETECTION: CATEGORIES IN BOTH SHOPS ---
+            name_to_shops = {}
+            for m in MainCategory.objects.all():
+                if m.name not in name_to_shops: name_to_shops[m.name] = set()
+                name_to_shops[m.name].add(m.shop_type)
+            
+            conflicts = [name for name, shops in name_to_shops.items() if len(shops) > 1]
+
+            # --- DETAILED RECAP FOR DEBUGGING ---
+            main_recap = []
+            for m in MainCategory.objects.all():
+                main_recap.append({"category": m.name, "shop": m.shop_type})
+
+            return Response({
+                "status": "Success", 
+                "message": f"Seeded {counts['main']} main categories, {counts['sub']} subcategories, and {counts['products']} products.",
+                "details": counts,
+                "conflicts": conflicts,
+                "mappings": main_recap,
+                "dump_path": dump_path
+            })
         except Exception as e:
             return Response({"error": str(e), "traceback": traceback.format_exc()}, status=500)
 

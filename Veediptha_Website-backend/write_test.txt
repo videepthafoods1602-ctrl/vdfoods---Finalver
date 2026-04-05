@@ -1,0 +1,2 @@
+# Verification of write access
+Access confirmed.

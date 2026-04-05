@@ -1,6 +1,6 @@
 from rest_framework import serializers
 from .models import (
-    Page, Product, Category, Coupon, WebsiteTheme, WebsiteBranding, 
+    Page, Product, Category, MainCategory, SubCategory, Coupon, WebsiteTheme, WebsiteBranding, 
     WebsiteTypography, WebsiteFooter, Story, Hero, Order, BulkOrder, Stock, 
     Promotion, SupportTicket
 )
@@ -118,6 +118,32 @@ class CategorySerializer(MongoSerializer):
             return CategorySerializer(obj.subcategories.all(), many=True).data
         return []
 
+class MainCategorySerializer(MongoSerializer):
+    id = serializers.CharField(read_only=True)
+    _id = serializers.CharField(source='id', read_only=True)
+    shop_type = serializers.CharField()
+    name = serializers.CharField()
+    slug = serializers.SlugField()
+    banner_image = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    order = serializers.IntegerField(required=False, default=0)
+    is_active = serializers.BooleanField(default=True)
+    subcategories = serializers.SerializerMethodField()
+
+    def get_subcategories(self, obj):
+        if hasattr(obj, 'subcategories'):
+            return SubCategorySerializer(obj.subcategories.all(), many=True).data
+        return []
+
+class SubCategorySerializer(MongoSerializer):
+    id = serializers.CharField(read_only=True)
+    _id = serializers.CharField(source='id', read_only=True)
+    main_category_id = serializers.CharField(source='main_category.id', read_only=True)
+    name = serializers.CharField()
+    slug = serializers.SlugField()
+    thumbnail = serializers.CharField(required=False, allow_blank=True, allow_null=True)
+    order = serializers.IntegerField(required=False, default=0)
+    is_active = serializers.BooleanField(default=True)
+
 class ProductSerializer(MongoSerializer):
     id = serializers.CharField(read_only=True)
     _id = serializers.CharField(source='id', read_only=True)
@@ -128,6 +154,7 @@ class ProductSerializer(MongoSerializer):
     stock = serializers.IntegerField()
     images = serializers.ListField(child=serializers.CharField())
     category_ids = serializers.ListField(child=serializers.CharField())
+    subcategory_id = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     attributes = serializers.DictField()
     is_active = serializers.BooleanField(default=True)
 
@@ -140,6 +167,7 @@ class ProductLiteSerializer(MongoSerializer):
     stock = serializers.IntegerField()
     images = serializers.ListField(child=serializers.CharField())
     category_ids = serializers.ListField(child=serializers.CharField())
+    subcategory_id = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     attributes = serializers.DictField(required=False, default=dict)
     is_active = serializers.BooleanField(default=True)
 

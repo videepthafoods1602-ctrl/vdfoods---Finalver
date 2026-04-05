@@ -91,22 +91,17 @@ export default function Home() {
             <section className="relative min-h-[100svh] overflow-hidden flex items-center justify-center">
                 {/* Background Video using user uploaded video5.mp4 */}
                 <video
+                    key="/assets/Video2.mp4"
                     ref={heroVideoRef}
                     autoPlay
-                    muted={isVideoMuted}
+                    muted
                     loop
                     playsInline
-                    className="absolute top-0 left-0 w-full h-full object-cover z-0"
-                    poster="/assets/bg-village.png"
-                    style={{ filter: 'brightness(0.7) contrast(1.1) sepia(0.1)' }}
+                    className="absolute top-0 left-0 w-full h-full object-cover z-0 blur-[3px] scale-[1.05] brightness-[0.85]"
+                    poster="/assets/background.png"
                 >
-                    <source src="/assets/video5.mp4" type="video/mp4" />
+                    <source src="/assets/Video2.mp4" type="video/mp4" />
                 </video>
-                <div
-                    className="absolute top-0 left-0 w-full h-full z-0"
-                    style={{ background: 'linear-gradient(to bottom, rgba(0,0,0, 0.4) 0%, var(--color-bg) 100%)', opacity: 0.8 }}
-                />
-
 
 
                 <motion.div
@@ -132,7 +127,10 @@ export default function Home() {
                         <h2 className="font-serif text-5xl md:text-7xl lg:text-[5rem] font-black uppercase tracking-[6px] mb-3 drop-shadow-2xl text-[var(--color-secondary)]">
                             VIDEEPTHA FOODS
                         </h2>
-                        <div className="text-xl md:text-2xl text-[var(--color-text)] tracking-[2px] uppercase opacity-90 drop-shadow-md whitespace-nowrap font-medium">
+                        <div 
+                            className="text-5xl md:text-6xl text-[#1a202c] tracking-[-1px] whitespace-nowrap mb-6 opactity-100 drop-shadow-md"
+                            style={{ fontFamily: 'var(--font-namaste)', textTransform: 'none' }}
+                        >
                             svastam prakrtham - snehitam
                         </div>
                     </motion.div>
