@@ -6,11 +6,13 @@ import Header from '../components/Header';
 import Footer from '../components/Footer';
 import HeroAlt from '../components/HeroAlt';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../config';
 
 export default function HomeAlt() {
     const [favoriteProducts, setFavoriteProducts] = useState<any[]>([]);
     const { addToCart, formatPrice } = useCart();
+    const { isLoggedIn, openAuthModal } = useAuth();
 
     useEffect(() => {
         const fetchHighlights = async () => {
@@ -97,12 +99,27 @@ export default function HomeAlt() {
                                     {/* Action Buttons Overlay */}
                                     <div className="absolute bottom-6 left-6 right-6 flex items-center justify-between opacity-0 translate-y-4 group-hover:opacity-100 group-hover:translate-y-0 transition-all duration-300">
                                         <button 
-                                            onClick={() => addToCart({ ...product, quantity: 1, image: product.images?.[0] })}
+                                            onClick={() => {
+                                                if (!isLoggedIn) {
+                                                    openAuthModal();
+                                                    return;
+                                                }
+                                                addToCart({ ...product, quantity: 1, image: product.images?.[0] });
+                                            }}
                                             className="bg-white text-[var(--color-text)] p-4 rounded-full shadow-xl hover:bg-[var(--color-primary)] hover:text-white transition-colors"
                                         >
                                             <ShoppingBag size={20} />
                                         </button>
-                                        <button className="bg-white text-[var(--color-text)] p-4 rounded-full shadow-xl hover:text-red-500 transition-colors">
+                                        <button 
+                                            onClick={() => {
+                                                if (!isLoggedIn) {
+                                                    openAuthModal();
+                                                    return;
+                                                }
+                                                // If needed, implement actual toggleFavorite here as well
+                                            }}
+                                            className="bg-white text-[var(--color-text)] p-4 rounded-full shadow-xl hover:text-red-500 transition-colors"
+                                        >
                                             <Heart size={20} />
                                         </button>
                                     </div>
