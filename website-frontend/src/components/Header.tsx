@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, LogIn, Home, Search, X } from 'lucide-react';
+import { ShoppingBag, LogIn, Home, Search, X, Leaf } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -231,8 +231,12 @@ const Header = () => {
                                         <p className="text-[9px] font-black uppercase tracking-[0.3em] text-[var(--color-text)]/30 px-3 py-2">Suggested Harvests</p>
                                         {filteredResults?.matchedCategories.map((cat) => (
                                             <button key={cat.id || cat._id} onClick={() => { navigate(`/categories?parent=${cat.id || cat._id}`); setSearchTerm(''); setIsSearchExpanded(false); }} className="w-full flex items-center gap-4 p-3 rounded-2xl hover:bg-[var(--color-primary)]/5 transition-all group text-left">
-                                                <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-[var(--color-border)]/50 bg-[var(--color-panel)]">
-                                                    <img src={getCategoryImage(cat.name, cat.media_url)} className="w-full h-full object-cover" alt={cat.name} />
+                                                <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-[var(--color-border)]/50 bg-[var(--color-panel)] flex items-center justify-center">
+                                                    {getCategoryImage(cat.name, cat.media_url) ? (
+                                                        <img src={getCategoryImage(cat.name, cat.media_url)} className="w-full h-full object-cover" alt={cat.name} />
+                                                    ) : (
+                                                        <Leaf className="text-[#84a98c]" size={20} />
+                                                    )}
                                                 </div>
                                                 <p className="font-serif font-black text-xs md:text-sm uppercase tracking-tight">{cat.name}</p>
                                             </button>
@@ -252,8 +256,27 @@ const Header = () => {
                                                         }} 
                                                         className="w-full flex items-center gap-4 p-3 rounded-2xl hover:bg-[var(--color-primary)]/5 transition-all group text-left"
                                                     >
-                                                        <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-[var(--color-border)]/50 bg-[#f9fbf9]">
-                                                            <img src={prod.media_url || (prod.images && prod.images[0])} className="w-full h-full object-cover" alt={prod.name} />
+                                                        <div className="w-10 h-10 rounded-xl overflow-hidden shrink-0 border border-[var(--color-border)]/50 bg-[#f9fbf9] flex items-center justify-center">
+                                                            {(prod.media_url || (prod.images && prod.images.length > 0)) ? (
+                                                                <img 
+                                                                    src={prod.media_url || prod.images[0]} 
+                                                                    className="w-full h-full object-cover" 
+                                                                    alt={prod.name}
+                                                                    onError={(e) => {
+                                                                        const target = e.target as HTMLImageElement;
+                                                                        target.style.display = 'none';
+                                                                        const parent = target.parentElement;
+                                                                        if (parent && !parent.querySelector('.search-fallback-leaf')) {
+                                                                            const leaf = document.createElement('div');
+                                                                            leaf.className = 'search-fallback-leaf flex items-center justify-center w-full h-full';
+                                                                            leaf.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#84a98c" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-leaf"><path d="M11 20A7 7 0 0 1 9.8 6.1C15.5 5 17 4.48 19 2c1 2 2 4.18 2 8 0 5.5-4.78 10-10 10Z"/><path d="M2 21c0-3 1.85-5.36 5.08-6C10.2 14.4 11.5 13 12 10"/></svg>';
+                                                                            parent.appendChild(leaf);
+                                                                        }
+                                                                    }}
+                                                                />
+                                                            ) : (
+                                                                <Leaf className="text-[#84a98c]" size={20} />
+                                                            )}
                                                         </div>
                                                         <div>
                                                             <p className="font-serif font-black text-xs md:text-sm uppercase tracking-tight line-clamp-1">{prod.name}</p>
