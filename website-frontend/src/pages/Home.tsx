@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, Volume2, VolumeX, Sprout, Sun, Droplet, ShieldCheck, MapPin } from 'lucide-react';
+import { Leaf, Volume2, VolumeX, Sprout, Sun, Droplet, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
@@ -13,7 +13,7 @@ export default function Home() {
     const [isVideoMuted, setIsVideoMuted] = useState(true);
     const [favoriteProducts, setFavoriteProducts] = useState<any[]>([]);
 
-    const { addToCart, formatPrice, locationData, refreshLocation } = useCart();
+    const { addToCart, formatPrice } = useCart();
     const { isLoggedIn, openAuthModal } = useAuth();
 
     const heroVideoRef = useRef<HTMLVideoElement>(null);
@@ -112,26 +112,7 @@ export default function Home() {
                     animate="visible"
                     variants={staggerVariants}
                 >
-                    {/* Floating Location Badge */}
-                    <motion.div 
-                        variants={fadeUpVariant}
-                        className="mb-8 flex justify-center"
-                    >
-                        <button
-                            onClick={refreshLocation}
-                            className="group flex items-center gap-3 px-6 py-2.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full hover:bg-white/20 transition-all shadow-2xl"
-                        >
-                            <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center border border-[var(--color-primary)]/30 group-hover:scale-110 transition-transform">
-                                <MapPin size={16} className="text-white" />
-                            </div>
-                            <div className="text-left">
-                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 leading-none mb-1">Village Harvested for</p>
-                                <p className="text-sm font-serif font-black text-white leading-none uppercase tracking-widest">
-                                    {locationData?.country_name || 'Detecting Location...'}
-                                </p>
-                            </div>
-                        </button>
-                    </motion.div>
+
                     <motion.div variants={fadeUpVariant} className="relative inline-block mb-10">
                         {/* Sweeping Leaf Animation Wrapper */}
                         <div className="absolute -top-8 -left-4 md:-top-12 md:-left-8 pointer-events-none overflow-visible">

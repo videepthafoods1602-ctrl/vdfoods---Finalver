@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, LogIn, Home, Search, X, Leaf } from 'lucide-react';
+import { ShoppingBag, LogIn, Home, Search, X, Leaf, MapPin } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -28,7 +28,7 @@ const Header = () => {
     const [allCategories, setAllCategories] = useState<any[]>([]);
     const [allProducts, setAllProducts] = useState<any[]>([]);
 
-    const { cartCount, setIsCartOpen } = useCart();
+    const { cartCount, setIsCartOpen, locationData, refreshLocation } = useCart();
     const { isLoggedIn, user, openAuthModal } = useAuth();
     const { theme } = useTheme();
 
@@ -147,7 +147,24 @@ const Header = () => {
                         </>
                     )}
 
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-center gap-2 sm:gap-3">
+                        {/* Location Button */}
+                        <Magnetic>
+                            <button
+                                onClick={refreshLocation}
+                                className={`flex items-center gap-2 px-3 sm:px-4 h-11 rounded-2xl border transition-all text-[10px] font-black uppercase tracking-widest
+                                    ${scrolled 
+                                        ? 'bg-[var(--color-panel)] border-[var(--color-border)] text-[var(--color-text)]' 
+                                        : isHomePage 
+                                            ? 'bg-white/10 border-white/20 text-white' 
+                                            : 'bg-black/5 border-black/10 text-black'}
+                                    hover:bg-[var(--color-secondary)] hover:text-white hover:border-[var(--color-secondary)]
+                                `}
+                            >
+                                <MapPin size={16} className={scrolled || !isHomePage ? 'text-[var(--color-primary)]' : 'text-white'} />
+                                <span className="hidden sm:inline">{locationData?.country_name || 'Village'}</span>
+                            </button>
+                        </Magnetic>
 
 
                         {/* Search Bar */}
