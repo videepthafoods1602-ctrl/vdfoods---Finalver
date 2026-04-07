@@ -49,6 +49,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
     'roti': '/assets/categories/vds_roti_flour_main.jpg',
 
     // --- PREMIUM STORE COLLECTIONS (Fixed Spacing & Names) ---
+    "vd's premium special": '/assets/categories/VDSpecial.jpeg',
     'millet rice': '/assets/Premium_Rice_Varieties.jpeg',
     'rice varieties': '/assets/Premium_Sub_Rice_Variety.jpeg',
     'millets': '/assets/Premium_sub_Millet_Variety.jpeg',
@@ -61,8 +62,10 @@ const CATEGORY_IMAGES: Record<string, string> = {
     'hair & massage oils': '/assets/categories/vds_massage_oils_sub.jpg',
     'abhyanga snana': '/assets/categories/vds_abhyanga_snana_sub.jpg',
     'ready to mix': '/assets/categories/Ready_To_Mix.jpeg',
-    'ready to eat': '/assets/categories/breakfast_collection_hero_1774757381802.png',
-    'museli': '/assets/categories/vds_baby_food_main.jpg',
+    'instant samber': '/assets/categories/InstantSamber.png',
+    'samber powder': '/assets/categories/InstantSamber.png',
+    'ready to eat': '/assets/categories/Readytoeat.jpeg',
+    'museli': '/assets/categories/Museli.jpeg',
     'diabetic friendly sweets': '/assets/categories/vds_sweets_heritage_sub_1775359637327.png',
     'tools': '/assets/Tools.jpeg',
     'womens friendly': '/assets/categories/women_health_wellness_hero_1774757984956.png',
@@ -95,7 +98,7 @@ const DEFAULT_IMAGES = [
 
 export const getCategoryImage = (name: string, currentUrl?: string) => {
     if (!name) return DEFAULT_IMAGES[0];
-    
+
     // Step 0: Absolute exact string match (case-insensitive)
     const rawLower = name.toLowerCase().trim();
     if (CATEGORY_IMAGES[rawLower]) return CATEGORY_IMAGES[rawLower];

@@ -1,10 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { Link } from 'react-router-dom';
-import { Leaf, Volume2, VolumeX, Sprout, Sun, Droplet, ShieldCheck } from 'lucide-react';
+import { Leaf, Volume2, VolumeX, Sprout, Sun, Droplet, ShieldCheck, MapPin } from 'lucide-react';
 import { motion } from 'framer-motion';
 import Header from '../components/Header';
 import Footer from '../components/Footer';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../config';
 
 export default function Home() {
@@ -12,7 +13,8 @@ export default function Home() {
     const [isVideoMuted, setIsVideoMuted] = useState(true);
     const [favoriteProducts, setFavoriteProducts] = useState<any[]>([]);
 
-    const { addToCart, formatPrice } = useCart();
+    const { addToCart, formatPrice, locationData, refreshLocation } = useCart();
+    const { isLoggedIn, openAuthModal } = useAuth();
 
     const heroVideoRef = useRef<HTMLVideoElement>(null);
     const philosophyVideoRef = useRef<HTMLVideoElement>(null);
@@ -29,7 +31,7 @@ export default function Home() {
                 const favIds = await favRes.json();
                 if (!Array.isArray(favIds) || favIds.length === 0) return;
 
-                const prodRes = await fetch(`${API_URL}/products/`);
+                const prodRes = await fetch(`${API_URL}/products/?_cb=${new Date().getTime()}`);
                 if (!prodRes.ok) return;
                 const allProducts = await prodRes.json();
 
@@ -110,6 +112,26 @@ export default function Home() {
                     animate="visible"
                     variants={staggerVariants}
                 >
+                    {/* Floating Location Badge */}
+                    <motion.div 
+                        variants={fadeUpVariant}
+                        className="mb-8 flex justify-center"
+                    >
+                        <button
+                            onClick={refreshLocation}
+                            className="group flex items-center gap-3 px-6 py-2.5 bg-white/10 backdrop-blur-xl border border-white/20 rounded-full hover:bg-white/20 transition-all shadow-2xl"
+                        >
+                            <div className="w-8 h-8 rounded-full bg-[var(--color-primary)]/20 flex items-center justify-center border border-[var(--color-primary)]/30 group-hover:scale-110 transition-transform">
+                                <MapPin size={16} className="text-white" />
+                            </div>
+                            <div className="text-left">
+                                <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 leading-none mb-1">Village Harvested for</p>
+                                <p className="text-sm font-serif font-black text-white leading-none uppercase tracking-widest">
+                                    {locationData?.city ? `${locationData.city}, ` : ''}{locationData?.country_name || 'Detecting Location...'}
+                                </p>
+                            </div>
+                        </button>
+                    </motion.div>
                     <motion.div variants={fadeUpVariant} className="relative inline-block mb-10">
                         {/* Sweeping Leaf Animation Wrapper */}
                         <div className="absolute -top-8 -left-4 md:-top-12 md:-left-8 pointer-events-none overflow-visible">
@@ -135,7 +157,7 @@ export default function Home() {
                         </div>
                     </motion.div>
 
-                    <motion.p variants={fadeUpVariant} className="text-xl md:text-2xl max-w-[850px] mx-auto mb-12 leading-relaxed font-medium text-[var(--color-text)] drop-shadow-md">
+                    <motion.p variants={fadeUpVariant} className="text-2xl sm:text-3xl md:text-4xl max-w-[950px] mx-auto mb-12 leading-relaxed font-medium text-[var(--color-text)] drop-shadow-md">
                         Grow stronger - live healthier.<br />
                         We do bring you a powerhouse in small packets for a better today tomorrow...
                     </motion.p>
@@ -307,45 +329,30 @@ export default function Home() {
                             <React.Fragment key={set}>
                                 <div className="w-[280px] bg-[#FDF8F0] border border-[var(--color-border)] p-6 rounded-3xl shrink-0 hover:border-[var(--color-primary)] transition-colors shadow-sm hover:shadow-md">
                                     <Sprout size={40} className="text-[var(--color-accent)] mb-4" />
-                                    <h3 className="text-xl font-black mb-3 text-[var(--color-text)]">
-                                        <span className="text-[var(--color-secondary)]">Unpolished</span> Grains
-                                    </h3>
                                     <p className="text-sm text-[var(--color-text-dim)] leading-relaxed">
                                         No <span className="font-bold text-[var(--color-secondary)]">Wheat</span> or <span className="font-bold text-[var(--color-secondary)]">Maida</span> fillers. Our millets retain their bran layer, providing maximum dietary fiber and slow-release energy.
                                     </p>
                                 </div>
                                 <div className="w-[280px] bg-[#F9F0E6] border-2 border-[var(--color-secondary)] p-6 rounded-3xl shrink-0 hover:border-[var(--color-primary)] transition-all shadow-xl hover:shadow-2xl scale-105 z-10 mx-2">
                                     <Sun size={48} className="text-[var(--color-secondary)] mb-4" />
-                                    <h3 className="text-2xl font-black mb-3 text-[var(--color-text)]">
-                                        <span className="text-[var(--color-secondary)] text-3xl">Zero</span> Whites
-                                    </h3>
                                     <p className="text-sm text-[var(--color-text)] leading-relaxed font-medium">
-                                        Sweetness should come from nature, not factories. We use <span className="font-bold text-[var(--color-secondary)]">Zero Sugar</span>, <span className="font-bold text-[var(--color-secondary)]">Zero Maida</span>, and <span className="font-bold text-[var(--color-secondary)]">No Wheat</span>, only pure, unrefined jaggery.
+                                        Nature's best for your family. We use <span className="font-bold text-[var(--color-secondary)]">Zero Sugar</span>, <span className="font-bold text-[var(--color-secondary)]">Zero Maida</span>, <span className="font-bold text-[var(--color-secondary)]">Zero Wheat</span>, and <span className="font-bold text-[var(--color-secondary)]">Zero Tamarind</span>—only pure, unrefined natural alternatives.
                                     </p>
                                 </div>
                                 <div className="w-[280px] bg-[#FDF8F0] border border-[var(--color-border)] p-6 rounded-3xl shrink-0 hover:border-[var(--color-primary)] transition-colors shadow-sm hover:shadow-md">
                                     <ShieldCheck size={40} className="text-[var(--color-primary)] mb-4" />
-                                    <h3 className="text-xl font-black mb-3 text-[var(--color-text)]">
-                                        <span className="text-[var(--color-secondary)]">Direct</span> Sourcing
-                                    </h3>
                                     <p className="text-sm text-[var(--color-text-dim)] leading-relaxed">
                                         We trace every ingredient back to the earth. By working <span className="font-bold text-[var(--color-secondary)]">Direct</span> with village farmers, we ensure fair trade and untampered crop quality.
                                     </p>
                                 </div>
                                 <div className="w-[280px] bg-[#FDF8F0] border border-[var(--color-border)] p-6 rounded-3xl shrink-0 hover:border-[var(--color-accent)] transition-colors shadow-sm hover:shadow-md">
                                     <Droplet size={40} className="text-[var(--color-accent)] mb-4" />
-                                    <h3 className="text-xl font-black mb-3 text-[var(--color-text)]">
-                                        <span className="text-[var(--color-secondary)]">Honest</span> Processing
-                                    </h3>
                                     <p className="text-sm text-[var(--color-text-dim)] leading-relaxed">
                                         Wooden-churned (Chekku) oils and stone-ground flours. <span className="font-bold text-[var(--color-secondary)]">Zero</span> high-heat processing to preserve antioxidants.
                                     </p>
                                 </div>
                                 <div className="w-[280px] bg-[#FDF8F0] border border-[var(--color-border)] p-6 rounded-3xl shrink-0 hover:border-[var(--color-primary)] transition-colors shadow-sm hover:shadow-md">
                                     <Leaf size={40} className="text-[var(--color-primary)] mb-4" />
-                                    <h3 className="text-xl font-black mb-3 text-[var(--color-text)]">
-                                        <span className="text-[var(--color-secondary)]">Sattvic</span> Mindset
-                                    </h3>
                                     <p className="text-sm text-[var(--color-text-dim)] leading-relaxed">
                                         Food is spiritual fuel. Every recipe is <span className="font-bold text-[var(--color-secondary)]">Sattvic</span>—clean, natural, and specifically designed for family health.
                                     </p>
@@ -396,6 +403,10 @@ export default function Home() {
                                         <button
                                             onClick={(e) => {
                                                 e.preventDefault();
+                                                if (!isLoggedIn) {
+                                                    openAuthModal();
+                                                    return;
+                                                }
                                                 addToCart({ ...product, price: product.price, image: product.images?.[0] || '', quantity: 1 });
                                             }}
                                             className="w-full py-3 bg-[var(--color-text)] text-white hover:bg-[var(--color-primary)] rounded-full font-bold uppercase tracking-widest text-xs transition-colors mt-auto shadow-md"

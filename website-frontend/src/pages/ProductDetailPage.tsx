@@ -3,12 +3,14 @@ import { useParams, Link } from 'react-router-dom';
 import { Leaf, ArrowLeft, ShoppingBag, ShieldCheck, Truck, Clock, ChevronRight, Info, Heart } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import PromotionSection from '../components/PromotionSection';
 import type { Promotion } from '../types';
 import { API_URL } from '../config';
-import { getWhatsAppLink } from '../utils/whatsappHelper';
-import { MessageCircle } from 'lucide-react';
+import { groupProductsWithVariants, extractVariantName } from '../utils/productUtils';
+
+
 
 interface Product {
     _id: string;
@@ -50,8 +52,11 @@ export default function ProductDetailPage() {
     const [activeImage, setActiveImage] = useState(0);
     const [quantity, setQuantity] = useState(1);
     const [selectedWeight, setSelectedWeight] = useState('500g');
+    const [variants, setVariants] = useState<Product[]>([]);
+    const [baseName, setBaseName] = useState('');
     const [isFavorite, setIsFavorite] = useState(false);
     const { addToCart, formatPrice, currency } = useCart();
+    const { isLoggedIn, openAuthModal } = useAuth();
 
     useEffect(() => {
         const fetchProduct = async () => {
@@ -66,17 +71,32 @@ export default function ProductDetailPage() {
                 const allProdData = await allProdRes.json();
 
                 setProduct(prodData);
+                setSelectedWeight(extractVariantName(prodData.name));
 
-                if (Array.isArray(allProdData) && prodData.category_ids) {
-                    const similar = allProdData
-                        .filter((p: Product) =>
-                            p._id !== id &&
-                            p.is_active &&
-                            p.category_ids &&
-                            p.category_ids.some(cat => prodData.category_ids.includes(cat))
-                        )
-                        .slice(0, 4);
-                    setSimilarProducts(similar.length > 0 ? similar : allProdData.filter((p: Product) => p._id !== id).slice(0, 4));
+                if (Array.isArray(allProdData)) {
+                    // Find variant siblings
+                    const allGrouped = groupProductsWithVariants(allProdData);
+                    const currentGroup = allGrouped.find(g => 
+                        g.variants.some(v => v._id === prodData._id)
+                    );
+                    if (currentGroup) {
+                        setVariants(currentGroup.variants);
+                        setBaseName(currentGroup.baseName);
+                    } else {
+                        setBaseName(prodData.name);
+                    }
+
+                    if (prodData.category_ids) {
+                        const similar = allProdData
+                            .filter((p: Product) =>
+                                p._id !== id &&
+                                p.is_active &&
+                                p.category_ids &&
+                                p.category_ids.some(cat => prodData.category_ids.includes(cat))
+                            )
+                            .slice(0, 4);
+                        setSimilarProducts(similar.length > 0 ? similar : allProdData.filter((p: Product) => p._id !== id).slice(0, 4));
+                    }
                 }
 
                 const promoRes = await fetch(`${API_URL}/promotions/?product_id=${prodData._id || id}`);
@@ -121,9 +141,14 @@ export default function ProductDetailPage() {
     }, [id, currency]);
 
     const toggleFavorite = async () => {
+        if (!isLoggedIn) {
+            openAuthModal();
+            return;
+        }
+
         const token = localStorage.getItem('access_token');
         if (!token) {
-            alert("Please login to save favorites");
+            openAuthModal();
             return;
         }
 
@@ -232,7 +257,7 @@ export default function ProductDetailPage() {
                                 {product.category_ids[0]}
                             </span>
                             <h1 className="text-4xl md:text-6xl font-black text-[var(--color-text)] mb-6 font-serif leading-tight">
-                                {product.name}
+                                {baseName || product.name}
                             </h1>
 
                             <div className="text-3xl md:text-5xl font-black text-[var(--color-text)] mb-8 flex items-baseline gap-3">
@@ -269,23 +294,31 @@ export default function ProductDetailPage() {
                                 {product.description}
                             </p>
 
-                            {/* Weight Selection */}
+                            {/* Weight/Variant Selection */}
                             <div className="mb-10">
-                                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-text)]/40 mb-3">Select Quantity</div>
+                                <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-text)]/40 mb-3">
+                                    {variants.length > 1 ? 'Select Variant' : 'Pack Size'}
+                                </div>
                                 <div className="flex flex-wrap gap-3">
-                                    {['100g', '250g', '500g', '750g', '1kg', '2.5kg'].map((w) => (
-                                        <button
-                                            key={w}
-                                            onClick={() => setSelectedWeight(w)}
-                                            className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
-                                                selectedWeight === w
-                                                    ? 'bg-[var(--color-primary)] text-white shadow-lg'
-                                                    : 'bg-[var(--color-panel)] text-[var(--color-text)]/40 border border-[var(--color-border)] hover:border-[var(--color-primary)]/30'
-                                            }`}
-                                        >
-                                            {w === '100g' ? 'Trail Pack 100g' : w}
-                                        </button>
-                                    ))}
+                                    {variants.length > 1 ? (
+                                        variants.map((v) => (
+                                            <Link
+                                                key={v._id}
+                                                to={`/products/${v._id}`}
+                                                className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${
+                                                    product._id === v._id
+                                                        ? 'bg-[var(--color-primary)] text-white shadow-lg'
+                                                        : 'bg-[var(--color-panel)] text-[var(--color-text)]/40 border border-[var(--color-border)] hover:border-[var(--color-primary)]/30'
+                                                }`}
+                                            >
+                                                {extractVariantName(v.name)}
+                                            </Link>
+                                        ))
+                                    ) : (
+                                        <div className="px-6 py-2.5 rounded-full bg-[var(--color-panel)] text-[var(--color-text)]/70 border border-[var(--color-border)] text-[10px] font-black uppercase tracking-widest">
+                                            {extractVariantName(product.name)}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
 
@@ -307,6 +340,10 @@ export default function ProductDetailPage() {
                                     whileTap={{ scale: 0.98 }}
                                     className="flex-1 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] text-white h-14 rounded-full font-black uppercase tracking-widest text-sm flex items-center justify-center gap-3 shadow-xl shadow-[var(--color-primary)]/20"
                                     onClick={() => {
+                                        if (!isLoggedIn) {
+                                            openAuthModal();
+                                            return;
+                                        }
                                         addToCart({
                                             _id: product._id,
                                             name: product.name,
@@ -321,15 +358,7 @@ export default function ProductDetailPage() {
                                     <ShoppingBag size={20} /> Add to Basket
                                 </motion.button>
 
-                                <a 
-                                    href={getWhatsAppLink(product.name, selectedWeight)}
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="w-14 h-14 rounded-full flex items-center justify-center bg-emerald-500 text-white shadow-xl shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-shadow"
-                                    title="Bulk Inquiry"
-                                >
-                                    <MessageCircle size={24} />
-                                </a>
+
 
                                 <button
                                     type="button"

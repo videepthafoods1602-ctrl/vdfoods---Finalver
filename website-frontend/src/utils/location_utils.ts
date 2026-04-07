@@ -47,12 +47,31 @@ export const detectLocation = async (): Promise<LocationData> => {
         }
     }
 
-    // If native geolocation fails, is denied, or isn't supported, 
-    // we strictly default to US to not track users without their explicit permission.
+    // Secondary attempt: IP Geolocation (Silent, requires no prompt)
+    try {
+        const ipRes = await fetch('https://ipapi.co/json/');
+        const ipData = await ipRes.json();
+        
+        if (ipData && ipData.country_code) {
+            const isIndia = ipData.country_code === 'IN';
+            return {
+                country_code: ipData.country_code,
+                country_name: ipData.country_name,
+                city: ipData.city,
+                region: ipData.region,
+                currency: isIndia ? 'INR' : 'USD',
+                coordinates: { latitude: ipData.latitude, longitude: ipData.longitude }
+            };
+        }
+    } catch (ipError) {
+        console.warn('IP Fallback failed. Using ultimate defaults.', ipError);
+    }
+
+    // Ultimate fallback if both Native and IP fail
     return {
-        country_code: 'US',
-        country_name: 'United States',
-        currency: 'USD'
+        country_code: 'IN',
+        country_name: 'India',
+        currency: 'INR'
     };
 };
 

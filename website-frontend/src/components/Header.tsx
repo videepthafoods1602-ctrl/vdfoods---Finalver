@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
-import { ShoppingBag, LogIn, Home, MapPin, Search, Menu, X } from 'lucide-react';
+import { ShoppingBag, LogIn, Home, Search, X } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -23,14 +23,12 @@ const DEFAULT_NAV_ITEMS = [
 const Header = () => {
     const [navItems, setNavItems] = useState<any[]>(DEFAULT_NAV_ITEMS);
     const [scrolled, setScrolled] = useState(false);
-    const [showLocationTooltip, setShowLocationTooltip] = useState(false);
-    const [isMenuOpen, setIsMenuOpen] = useState(false);
     const [isSearchExpanded, setIsSearchExpanded] = useState(false);
     const [searchTerm, setSearchTerm] = useState('');
     const [allCategories, setAllCategories] = useState<any[]>([]);
     const [allProducts, setAllProducts] = useState<any[]>([]);
 
-    const { cartCount, setIsCartOpen, locationData, refreshLocation } = useCart();
+    const { cartCount, setIsCartOpen } = useCart();
     const { isLoggedIn, user, openAuthModal } = useAuth();
     const { theme } = useTheme();
 
@@ -62,9 +60,8 @@ const Header = () => {
 
         const handleScroll = () => setScrolled(window.scrollY > 20);
         window.addEventListener('scroll', handleScroll);
-
-        fetch(`${API_URL}/categories/`).then(res => res.json()).then(setAllCategories);
-        fetch(`${API_URL}/products/`).then(res => res.json()).then(setAllProducts);
+        fetch(`${API_URL}/categories/?_cb=${new Date().getTime()}`).then(res => res.json()).then(setAllCategories);
+        fetch(`${API_URL}/products/?_cb=${new Date().getTime()}`).then(res => res.json()).then(setAllProducts);
 
         return () => window.removeEventListener('scroll', handleScroll);
     }, []);
@@ -123,15 +120,6 @@ const Header = () => {
                     ) : (
                         <>
                             <div className="flex items-center gap-4">
-                                <Magnetic>
-                                    <button
-                                        onClick={() => setIsMenuOpen(true)}
-                                        className={`flex items-center justify-center w-11 h-11 rounded-2xl border transition-all group ${isHomePage ? 'lg:hidden' : ''} ${scrolled ? 'bg-[var(--color-panel)] border-[var(--color-border)] text-[var(--color-text)]' : isHomePage ? 'bg-white/10 border-white/20 text-white' : 'bg-black/5 border-black/10 text-black'} hover:bg-[var(--color-secondary)] hover:text-white hover:border-[var(--color-secondary)]`}
-                                    >
-                                        <Menu size={20} />
-                                    </button>
-                                </Magnetic>
-
                                 <Link to="/" className="flex items-center gap-3 group">
                                     <div>
                                         <span className={`text-lg sm:text-2xl font-black tracking-wider font-['Gagalin'] uppercase block leading-none ${(scrolled || !isHomePage) ? 'text-[var(--color-secondary)]' : 'text-white'}`}>Vidya-Pradeep</span>
@@ -160,27 +148,7 @@ const Header = () => {
                     )}
 
                     <div className="flex items-center gap-3">
-                        {/* Location Button - Desktop Only */}
-                        <div className="hidden md:flex items-center gap-2">
-                            <Magnetic>
-                                <button
-                                    onClick={async () => {
-                                        setShowLocationTooltip(!showLocationTooltip);
-                                        await refreshLocation();
-                                    }}
-                                    className={`flex items-center gap-2 px-4 py-2 rounded-xl border transition-all text-[10px] font-black uppercase tracking-widest
-                                        ${scrolled 
-                                            ? 'bg-[var(--color-panel)] border-[var(--color-border)] text-[var(--color-text)]' 
-                                            : isHomePage 
-                                                ? 'bg-white/10 border-white/20 text-white' 
-                                                : 'bg-black/5 border-black/10 text-black'}
-                                    `}
-                                >
-                                    <MapPin size={14} className={scrolled || !isHomePage ? 'text-[var(--color-primary)]' : 'text-white'} />
-                                    <span className="hidden lg:inline">{locationData?.city || locationData?.country_name || 'Village'}</span>
-                                </button>
-                            </Magnetic>
-                        </div>
+
 
                         {/* Search Bar */}
                         <motion.div 
@@ -307,38 +275,7 @@ const Header = () => {
                 </div>
             </nav>
 
-            <AnimatePresence>
-                {isMenuOpen && (
-                    <>
-                        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} onClick={() => setIsMenuOpen(false)} className="fixed inset-0 bg-black/60 backdrop-blur-md z-[200]" />
-                        <motion.div initial={{ x: '-100%' }} animate={{ x: 0 }} exit={{ x: '-100%' }} transition={{ type: 'spring', damping: 25, stiffness: 200 }} className="fixed top-0 left-0 h-screen w-full max-w-[400px] bg-[var(--color-bg)] shadow-[50px_0_100px_rgba(0,0,0,0.3)] z-[201] flex flex-col p-10 overflow-y-auto">
-                            <div className="flex justify-between items-center mb-10">
-                                <Link to="/" onClick={() => setIsMenuOpen(false)} className="flex items-center gap-3">
-                                    <span className="text-xl font-black font-['Gagalin'] text-[var(--color-secondary)] uppercase">Vidya-Pradeep</span>
-                                </Link>
-                                <button onClick={() => setIsMenuOpen(false)} className="w-10 h-10 flex items-center justify-center rounded-2xl bg-[var(--color-panel)] border border-[var(--color-border)] hover:bg-black hover:text-white transition-all"><X size={18} /></button>
-                            </div>
-                            <div className="flex items-center justify-between bg-[var(--color-panel)] p-4 rounded-3xl mb-12 border border-[var(--color-border)]">
-                                <div className="flex items-center gap-2">
-                                    <button onClick={() => setIsCartOpen(true)} className="relative w-12 h-12 bg-white rounded-2xl flex items-center justify-center shadow-sm">
-                                        <ShoppingBag size={20} className="text-[var(--color-secondary)]" />
-                                        {cartCount > 0 && <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[10px] font-black rounded-full flex items-center justify-center border-2 border-white">{cartCount}</span>}
-                                    </button>
-                                </div>
-                                <div className="flex items-center gap-2">
-                                     <button onClick={async () => { setShowLocationTooltip(!showLocationTooltip); await refreshLocation(); }} className="flex items-center gap-2 px-3 h-12 bg-white rounded-2xl shadow-sm text-[10px] font-black uppercase tracking-widest"><MapPin size={16} className="text-[var(--color-secondary)]" />{locationData?.country_name || 'India'}</button>
-                                     {isLoggedIn ? <Link to="/settings" onClick={() => setIsMenuOpen(false)} className="w-12 h-12 rounded-2xl bg-[var(--color-secondary)] text-white flex items-center justify-center font-black">{user?.email?.charAt(0).toUpperCase()}</Link> : <button onClick={openAuthModal} className="w-12 h-12 rounded-2xl bg-[var(--color-secondary)] text-white flex items-center justify-center"><LogIn size={20} /></button>}
-                                </div>
-                            </div>
-                            <div className="flex flex-col gap-4 mb-auto">
-                                {navItems.map((item, idx) => (
-                                    <Link key={idx} to={item.link} onClick={() => setIsMenuOpen(false)} className={`text-3xl font-serif font-black uppercase tracking-tighter transition-all hover:translate-x-4 ${isActive(item.link) ? 'text-[var(--color-primary)]' : 'text-[var(--color-text)] hover:text-[var(--color-primary)]'}`}>{item.label}</Link>
-                                ))}
-                            </div>
-                        </motion.div>
-                    </>
-                )}
-            </AnimatePresence>
+
         </header>
     );
 };

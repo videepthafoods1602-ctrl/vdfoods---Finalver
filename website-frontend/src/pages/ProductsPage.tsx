@@ -6,8 +6,8 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import { API_URL } from '../config';
-import { getWhatsAppLink } from '../utils/whatsappHelper';
-import { MessageCircle } from 'lucide-react';
+import { groupProductsWithVariants, extractVariantName } from '../utils/productUtils';
+
 
 interface Product {
     _id: string;
@@ -30,9 +30,9 @@ export default function ProductsPage() {
     const [selectedCategory, setSelectedCategory] = useState<string>(searchParams.get('category') || 'All');
     const [maxPrice, setMaxPrice] = useState<number>(10000);
     const [favorites, setFavorites] = useState<string[]>([]);
-    const [selectedWeights, setSelectedWeights] = useState<Record<string, string>>({});
+    const [selectedVariantIds, setSelectedVariantIds] = useState<Record<string, string>>({});
     const { addToCart, formatPrice, currency } = useCart();
-    const { openAuthModal } = useAuth();
+    const { isLoggedIn, openAuthModal } = useAuth();
     const [allCategories, setAllCategories] = useState<any[]>([]);
 
 
@@ -49,7 +49,7 @@ export default function ProductsPage() {
         const fetchProducts = async () => {
             try {
                 // Fetch products with current currency preference
-                const res = await fetch(`${API_URL}/products/`);
+                const res = await fetch(`${API_URL}/products/?_cb=${new Date().getTime()}`);
                 if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
                 const data = await res.json();
                 setProducts(data.filter((p: Product) => p.is_active));
@@ -79,7 +79,7 @@ export default function ProductsPage() {
 
         const fetchAllCategories = async () => {
             try {
-                const res = await fetch(`${API_URL}/categories/`);
+                const res = await fetch(`${API_URL}/categories/?_cb=${new Date().getTime()}`);
                 const data = await res.json();
                 setAllCategories(data);
             } catch (err) {
@@ -164,23 +164,23 @@ export default function ProductsPage() {
             <Header />
 
             {/* Main Content */}
-            <main className="relative z-10 pt-32 pb-20 px-6">
+            <main className="relative z-10 pt-28 md:pt-36 pb-20 px-4 md:px-6">
                 <div className="max-w-7xl mx-auto">
 
 
                     {/* Sticky Modern Filter Bar */}
-                    <div className="sticky top-20 z-40 bg-[var(--color-bg)]/80 backdrop-blur-xl border-b border-[var(--color-border)] mb-12 py-4">
-                        <div className="max-w-7xl mx-auto px-4">
-                            <div className="flex items-center gap-4 mb-4">
+                    <div className="sticky top-[74px] md:top-24 z-40 bg-[var(--color-bg)]/95 backdrop-blur-xl border-b border-[var(--color-border)] -mx-4 md:-mx-6 mb-6 md:mb-12 py-3 md:py-4">
+                        <div className="max-w-7xl mx-auto px-4 md:px-6">
+                            <div className="flex items-center gap-2 md:gap-4 mb-3 md:mb-4">
                                 <Link
                                     to="/categories"
-                                    className="flex items-center gap-2 px-4 py-2 bg-[var(--color-secondary)]/10 text-[var(--color-secondary)] rounded-xl border border-[var(--color-secondary)]/20 hover:bg-[var(--color-secondary)]/20 transition-all text-[10px] font-black uppercase tracking-widest group"
+                                    className="flex items-center justify-center p-2.5 md:px-4 md:py-2 bg-[var(--color-secondary)]/10 text-[var(--color-secondary)] rounded-xl border border-[var(--color-secondary)]/20 hover:bg-[var(--color-secondary)]/20 transition-all group shrink-0"
                                 >
                                     <Leaf size={14} className="group-hover:rotate-12 transition-transform" />
-                                    Categories
+                                    <span className="hidden md:inline ml-2 text-[10px] font-black uppercase tracking-widest">Categories</span>
                                 </Link>
-                                <div className="h-4 w-[1px] bg-[var(--color-border)] mx-2" />
-                                <div className="flex gap-3 overflow-x-auto hide-scrollbar pb-2 snap-x flex-1">
+                                <div className="h-4 w-[1px] bg-[var(--color-border)] mx-1" />
+                                <div className="flex gap-2 md:gap-3 overflow-x-auto hide-scrollbar pb-1 snap-x flex-1">
                                     {uniqueFilterCategories.map((cat) => (
                                         <button
                                             key={cat.id}
@@ -188,8 +188,8 @@ export default function ProductsPage() {
                                                 setSelectedCategory(cat.id);
                                                 setSearchParams({ category: cat.id });
                                             }}
-                                            className={`px-8 py-3 rounded-full font-black uppercase tracking-[0.15em] text-[10px] whitespace-nowrap transition-all snap-center ${selectedCategory === cat.id
-                                                ? 'bg-[var(--color-primary)] text-white shadow-lg shadow-[var(--color-primary)]/20'
+                                            className={`px-5 md:px-8 py-2 md:py-3 rounded-full font-black uppercase tracking-[0.1em] md:tracking-[0.15em] text-[8px] md:text-[10px] whitespace-nowrap transition-all snap-center ${selectedCategory === cat.id
+                                                ? 'bg-[var(--color-primary)] text-white shadow-lg'
                                                 : 'bg-[var(--color-panel)] text-[var(--color-text)]/40 border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:text-[var(--color-text)]'
                                                 }`}
                                         >
@@ -200,16 +200,16 @@ export default function ProductsPage() {
                             </div>
 
                             {/* Sub-Filters & Controls */}
-                            <div className="flex flex-wrap items-center justify-between gap-6 mt-4 opacity-70 hover:opacity-100 transition-opacity">
-                                <div className="flex items-center gap-6 flex-1 max-w-sm">
-                                    <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text)]/50">Price Cap: {formatPrice(maxPrice)}</span>
+                            <div className="flex items-center gap-4 mt-2 opacity-80 overflow-x-auto hide-scrollbar">
+                                <div className="flex items-center gap-3 flex-1 min-w-[200px]">
+                                    <span className="text-[8px] md:text-[10px] font-black uppercase tracking-widest text-[var(--color-text)]/50 whitespace-nowrap">Cap: {formatPrice(maxPrice)}</span>
                                     <input
                                         type="range"
                                         min="0"
                                         max={highestPriceInDb}
                                         value={maxPrice}
                                         onChange={(e) => setMaxPrice(Number(e.target.value))}
-                                        className="w-full accent-[var(--color-primary)] bg-[var(--color-border)] h-[2px] rounded-lg appearance-none cursor-pointer hover:h-1 transition-all"
+                                        className="w-full max-w-[150px] md:max-w-sm accent-[var(--color-primary)] bg-[var(--color-border)] h-[2px] rounded-lg appearance-none cursor-pointer"
                                     />
                                 </div>
 
@@ -217,12 +217,13 @@ export default function ProductsPage() {
                                     onClick={() => {
                                         setSelectedCategory('All');
                                         setSearchParams({});
-                                        setMaxPrice(10000);
+                                        setMaxPrice(highestPriceInDb);
                                     }}
-                                    className="flex items-center gap-2 text-[var(--color-text)]/40 hover:text-[var(--color-primary)] text-[10px] font-black uppercase tracking-widest transition-all group"
+                                    className="flex items-center justify-center w-8 h-8 md:w-auto md:px-4 md:py-2 rounded-lg md:bg-[var(--color-panel)] border border-[var(--color-border)] text-[var(--color-text)]/40 hover:text-[var(--color-primary)] transition-all group shrink-0"
+                                    title="Reset Filters"
                                 >
                                     <FilterX size={14} className="group-hover:rotate-90 transition-transform" />
-                                    Reset Filters
+                                    <span className="hidden md:inline ml-2 text-[10px] font-black uppercase tracking-widest">Reset</span>
                                 </button>
                             </div>
                         </div>
@@ -231,107 +232,132 @@ export default function ProductsPage() {
                     {/* High-Density Products List (With Images & Variants) */}
                     <div className="flex flex-col gap-4 w-full max-w-7xl mx-auto py-4">
                         <AnimatePresence mode="popLayout">
-                            {filteredProducts.map((product, index) => (
-                                <motion.div
-                                    key={product._id}
-                                    layout
-                                    initial={{ opacity: 0, x: -10 }}
-                                    animate={{ opacity: 1, x: 0 }}
-                                    exit={{ opacity: 0, x: 10 }}
-                                    transition={{ duration: 0.3, delay: (index % 20) * 0.02 }}
-                                    className="group grid grid-cols-12 items-center bg-[var(--color-panel)]/30 hover:bg-white border border-[var(--color-border)]/50 rounded-[2rem] p-4 md:p-6 transition-all hover:shadow-xl hover:border-[var(--color-primary)]/20"
-                                >
-                                    {/* Name Column */}
-                                    <div className="col-span-12 md:col-span-5 flex items-center gap-6">
-                                        <div className="w-12 h-12 rounded-full bg-[var(--color-surface)] flex items-center justify-center border border-[var(--color-border)] shrink-0">
-                                            <Leaf size={24} className="text-[var(--color-primary)] opacity-40" />
-                                        </div>
-                                        <div className="flex flex-col gap-1">
-                                            <div className="flex items-center gap-2">
-                                                <button
-                                                    onClick={(e) => {
-                                                        e.preventDefault();
-                                                        toggleFavorite(product._id);
-                                                    }}
-                                                    className="p-1.5 rounded-full hover:bg-[var(--color-panel)] transition-colors"
-                                                >
-                                                    <Heart
-                                                        size={14}
-                                                        className={favorites.includes(product._id) ? "fill-[var(--color-secondary)] text-[var(--color-secondary)]" : "text-[var(--color-text)]/30"}
-                                                    />
-                                                </button>
-                                                <div className="flex items-center gap-2">
-                                                    <h2 className="text-xl md:text-2xl font-serif font-black text-[var(--color-text)] transition-colors line-clamp-2">
-                                                        {product.name}
-                                                    </h2>
+                            {(() => {
+                                const grouped = groupProductsWithVariants(filteredProducts);
+                                return grouped.map((group, index) => {
+                                    const selectedId = selectedVariantIds[group.baseName] || group.defaultProduct._id;
+                                    const product = group.variants.find(v => v._id === selectedId) || group.defaultProduct;
+                                    
+                                    return (
+                                        <motion.div
+                                            key={group.baseName}
+                                            layout
+                                            initial={{ opacity: 0, x: -10 }}
+                                            animate={{ opacity: 1, x: 0 }}
+                                            exit={{ opacity: 0, x: 10 }}
+                                            transition={{ duration: 0.3, delay: (index % 20) * 0.02 }}
+                                            className="group bg-[var(--color-panel)]/30 hover:bg-white border border-[var(--color-border)]/50 rounded-[1.5rem] md:rounded-[2rem] p-4 md:p-6 transition-all hover:shadow-xl hover:border-[var(--color-primary)]/20 relative"
+                                        >
+                                            <Link to={`/products/${product._id}`} className="absolute inset-0 z-0" />
+                                            <div className="flex flex-col md:grid md:grid-cols-12 md:items-center gap-4 md:gap-0 relative z-10 pointer-events-none">
+                                                <div className="md:col-span-5 flex items-start md:items-center gap-4 md:gap-6 pointer-events-auto">
+                                                    <div className="w-20 h-20 md:w-20 md:h-20 lg:w-24 lg:h-24 rounded-2xl bg-white flex items-center justify-center border border-[var(--color-border)] shrink-0 overflow-hidden shadow-sm">
+                                                        {product.images?.[0] ? (
+                                                            <img 
+                                                                src={product.images[0]} 
+                                                                alt={product.name} 
+                                                                className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" 
+                                                            />
+                                                        ) : (
+                                                            <div className="p-4 bg-[var(--color-surface)]">
+                                                                <Leaf size={24} className="text-[var(--color-primary)] opacity-40" />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="flex flex-col gap-1 min-w-0 pr-2">
+                                                        <div className="flex items-center gap-2">
+                                                            <h2 className="text-base md:text-lg lg:text-xl font-serif font-black text-[var(--color-text)] transition-colors leading-tight">
+                                                                {group.baseName}
+                                                            </h2>
+                                                        </div>
+                                                        <div className="flex items-center gap-2">
+                                                            <span className="text-[8px] md:text-[9px] font-black uppercase tracking-widest text-[var(--color-text)]/40">Pure Village Heritage</span>
+                                                        </div>
+                                                        <button
+                                                            onClick={(e) => {
+                                                                e.preventDefault();
+                                                                e.stopPropagation();
+                                                                toggleFavorite(product._id);
+                                                            }}
+                                                            className="mt-1 w-fit p-1.5 rounded-full hover:bg-[var(--color-panel)] transition-colors border border-[var(--color-border)]"
+                                                        >
+                                                            <Heart
+                                                                size={12}
+                                                                className={favorites.includes(product._id) ? "fill-[var(--color-secondary)] text-[var(--color-secondary)]" : "text-[var(--color-text)]/30"}
+                                                            />
+                                                        </button>
+                                                    </div>
+                                                </div>
+        
+                                                <div className="md:col-span-4 flex flex-col gap-2 px-0 md:px-6 pointer-events-auto">
+                                                    {group.variants.length > 1 ? (
+                                                        <>
+                                                            <div className="text-[8px] font-black uppercase tracking-[0.2em] text-[var(--color-text)]/40">Select Variant</div>
+                                                            <div className="relative">
+                                                                <select
+                                                                    value={selectedId}
+                                                                    onChange={(e) => {
+                                                                        e.stopPropagation();
+                                                                        setSelectedVariantIds(prev => ({ ...prev, [group.baseName]: e.target.value }));
+                                                                    }}
+                                                                    className="w-full bg-[var(--color-surface)] text-[10px] font-black uppercase tracking-widest px-4 py-2.5 rounded-xl border border-[var(--color-border)] focus:border-[var(--color-primary)] outline-none appearance-none cursor-pointer hover:bg-white transition-colors"
+                                                                >
+                                                                    {group.variants.map((v) => (
+                                                                        <option key={v._id} value={v._id}>
+                                                                            {extractVariantName(v.name)}
+                                                                        </option>
+                                                                    ))}
+                                                                </select>
+                                                                <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+                                                                    <Leaf size={10} />
+                                                                </div>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div className="flex flex-col gap-1">
+                                                            <div className="text-[8px] font-black uppercase tracking-[0.2em] text-[var(--color-text)]/40">Pack Size</div>
+                                                            <span className="text-[10px] font-black">{extractVariantName(product.name)}</span>
+                                                        </div>
+                                                    )}
+                                                </div>
+        
+                                                <div className="md:col-span-3 flex items-center justify-between md:justify-end gap-4 md:gap-8 pointer-events-auto">
+                                                    <div className="flex flex-col items-end">
+                                                        <span className="text-xl md:text-2xl font-serif font-black text-[var(--color-primary)]">{formatPrice(product.price)}</span>
+                                                        <div className="flex items-center gap-1.5 opacity-40">
+                                                            <ShoppingBag size={10} />
+                                                            <span className="text-[8px] font-black uppercase">In stock</span>
+                                                        </div>
+                                                    </div>
+                                                    <motion.button
+                                                        whileHover={{ scale: 1.1 }}
+                                                        whileTap={{ scale: 0.9 }}
+                                                        onClick={(e) => {
+                                                            e.preventDefault();
+                                                            e.stopPropagation();
+                                                            if (!isLoggedIn) {
+                                                                openAuthModal();
+                                                                return;
+                                                            }
+                                                            addToCart({
+                                                                _id: product._id,
+                                                                name: product.name,
+                                                                price: product.price,
+                                                                image: product.images[0],
+                                                                quantity: 1,
+                                                                selectedWeight: extractVariantName(product.name)
+                                                            });
+                                                        }}
+                                                        className="h-12 w-12 md:h-14 md:w-14 bg-[var(--color-primary)] text-white rounded-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg shadow-[var(--color-primary)]/20"
+                                                    >
+                                                        <ShoppingBag size={20} />
+                                                    </motion.button>
                                                 </div>
                                             </div>
-                                            <div className="flex items-center gap-2">
-                                                <span className="text-[10px] font-black uppercase tracking-widest text-[var(--color-text)]/40">100% Organic Heritage</span>
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* Weight Selection (Variants) */}
-                                    <div className="col-span-12 md:col-span-4 flex flex-col gap-3 px-4 py-4 md:py-0">
-                                        <div className="text-[10px] font-black uppercase tracking-[0.2em] text-[var(--color-text)]/40 mb-1">Select Quantity</div>
-                                        <div className="flex flex-wrap gap-2">
-                                            {['100g', '250g', '500g', '750g', '1kg', '2.5kg'].map((w) => (
-                                                <button
-                                                    key={w}
-                                                    onClick={() => setSelectedWeights(prev => ({ ...prev, [product._id]: w }))}
-                                                    className={`px-3 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest transition-all ${(selectedWeights[product._id] || (w === '500g' ? '500g' : '')) === w
-                                                        ? 'bg-[var(--color-primary)] text-white shadow-md'
-                                                        : 'bg-[var(--color-surface)] text-[var(--color-text)]/40 border border-[var(--color-border)] hover:border-[var(--color-primary)]/30'
-                                                        }`}
-                                                >
-                                                    {w === '100g' ? 'Trail 100g' : w}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Price & Primary Actions */}
-                                    <div className="col-span-12 md:col-span-3 flex items-center justify-between md:justify-end gap-6 border-t md:border-t-0 border-[var(--color-border)]/50 pt-4 md:pt-0">
-                                        <div className="flex flex-col items-start md:items-end">
-                                            <span className="text-2xl font-serif font-black text-[var(--color-primary)]">{formatPrice(product.price)}</span>
-                                            <span className="text-[9px] font-black uppercase tracking-widest text-[var(--color-text)]/30 mt-1">Free Delivery</span>
-                                        </div>
-
-                                        <div className="flex items-center gap-3">
-                                            <a
-                                                href={getWhatsAppLink(product.name, selectedWeights[product._id] || '500g')}
-                                                target="_blank"
-                                                rel="noopener noreferrer"
-                                                className="p-3 bg-emerald-500 text-white rounded-full shadow-lg shadow-emerald-500/20 hover:shadow-emerald-500/40 transition-shadow group/wa"
-                                                title="Bulk Inquiry"
-                                            >
-                                                <MessageCircle size={20} className="group-hover/wa:rotate-12 transition-transform" />
-                                            </a>
-                                            <motion.button
-                                                whileHover={{ scale: 1.05 }}
-                                                whileTap={{ scale: 0.95 }}
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    addToCart({
-                                                        ...product,
-                                                        price: product.price,
-                                                        image: product.images?.[0] || '',
-                                                        quantity: 1,
-                                                        selectedWeight: selectedWeights[product._id] || '500g',
-                                                        attributes: product.attributes
-                                                    });
-                                                }}
-                                                disabled={product.stock === 0}
-                                                className="flex items-center gap-3 px-6 py-3 bg-[var(--color-text)] text-white rounded-full disabled:opacity-30 disabled:grayscale shadow-lg hover:bg-[var(--color-primary)] transition-all font-black uppercase tracking-widest text-[10px]"
-                                            >
-                                                <ShoppingBag size={16} />
-                                                Add To Cart
-                                            </motion.button>
-                                        </div>
-                                    </div>
-                                </motion.div>
-                            ))}
+                                        </motion.div>
+                                    );
+                                });
+                            })()}
                         </AnimatePresence>
                     </div>
 
@@ -345,16 +371,14 @@ export default function ProductsPage() {
                         </motion.div>
                     )}
                 </div>
-            </main >
-
-            {/* Footer */}
-            < footer className="relative z-10 w-full border-t border-[var(--color-border)] bg-[var(--color-bg)] py-16 text-center" >
+            </main>
+            <footer className="relative z-10 w-full border-t border-[var(--color-border)] bg-[var(--color-bg)] py-16 text-center">
                 <div className="flex flex-col items-center gap-4">
                     <Leaf className="text-[var(--color-primary)]" size={40} />
                     <h2 className="text-2xl font-serif text-[var(--color-text)] italic">Videeptha Foods</h2>
                     <p className="text-[var(--color-text)]/60 font-light">© 2026 Videeptha Foods. Rooted in Nature.</p>
                 </div>
-            </footer >
-        </div >
+            </footer>
+        </div>
     );
 }

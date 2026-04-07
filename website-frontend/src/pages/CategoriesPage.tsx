@@ -1,10 +1,14 @@
 import { useEffect, useState, useRef, useMemo } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { Leaf, ArrowLeft, Heart, ShoppingBag, MessageCircle } from 'lucide-react';
+import { Leaf, ArrowLeft, Heart, ShoppingBag } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Header from '../components/Header';
+import { useCart } from '../context/CartContext';
+import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../config';
 import { getCategoryImage } from '../utils/category_utils';
+import { groupProductsWithVariants, extractVariantName } from '../utils/productUtils';
+
 
 interface DbCategory {
     id: string;
@@ -17,8 +21,8 @@ interface DbCategory {
 }
 
 interface Product {
-    id: string;
     _id: string;
+    id?: string;
     name: string;
     description: string;
     price: number;
@@ -26,11 +30,18 @@ interface Product {
     weight?: string;
     images: string[];
     subcategory_id?: string;
-    category_ids?: string[];
+    category_ids: string[];
+    stock: number;
+    is_active: boolean;
 }
 
-const ProductListRow = ({ product }: { product: Product }) => {
-    // Detect liquid if name contains oil, juice, syrup, squash, drops, liquid
+interface ProductListRowProps {
+    product: Product;
+    isFavorite: boolean;
+    toggleFavorite: (productId: string) => void;
+}
+
+const StandardProductListRow = ({ product, isFavorite, toggleFavorite }: ProductListRowProps) => {
     const isLiquid = product.name.toLowerCase().match(/(oil|juice|syrup|squash|drops|liquid|kanji|soda|fizz)/);
     
     const quantities = isLiquid ? [
@@ -51,21 +62,19 @@ const ProductListRow = ({ product }: { product: Product }) => {
 
     const [selectedQty, setSelectedQty] = useState(quantities[2]); // Default 500g/500ml
 
-    // Location-based currency
-    const isIndia = Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Asia/Kolkata') || Intl.DateTimeFormat().resolvedOptions().timeZone.includes('Asia/Calcutta');
-    const currency = isIndia ? '₹' : '$';
+    const { addToCart, formatPrice } = useCart();
+    const { isLoggedIn, openAuthModal } = useAuth();
 
     const basePrice = product.price || 0.00;
     const finalPrice = (basePrice * selectedQty.mult).toFixed(2);
     
-    // Determine image using the same helper from component scope (if imported at top level) or we can just use the product media_url directly
     const hasImage = product.media_url || (product.images && product.images.length > 0);
     const imageUrl = product.media_url || (product.images && product.images[0]);
 
     return (
-        <div className="w-full flex items-center justify-between bg-white border border-[var(--color-border)] rounded-[2rem] px-6 py-3 shadow-sm hover:shadow-md transition-shadow">
+        <div className="w-full flex flex-col md:flex-row items-center justify-between bg-white border border-[var(--color-border)] rounded-[1.5rem] md:rounded-[2rem] p-4 md:px-6 md:py-3 shadow-sm hover:shadow-md transition-shadow gap-4 md:gap-0">
             {/* Left Section: Icon & Details */}
-            <div className="flex items-center gap-6 min-w-0 flex-1">
+            <div className="flex items-center gap-4 md:gap-6 min-w-0 w-full md:flex-1">
                 <div className="w-16 h-16 bg-[#eaf4ec] rounded-2xl flex items-center justify-center shrink-0 border border-[#c4e3cb] overflow-hidden">
                     {hasImage ? (
                         <img src={imageUrl} alt={product.name} className="w-full h-full object-cover" />
@@ -74,23 +83,29 @@ const ProductListRow = ({ product }: { product: Product }) => {
                     )}
                 </div>
                 
-                <button className="text-[var(--color-text)]/40 hover:text-red-500 transition-colors shrink-0">
-                    <Heart size={20} />
+                <button 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(product._id);
+                    }}
+                    className={`transition-colors shrink-0 ${isFavorite ? 'text-red-500' : 'text-[var(--color-text)]/40 hover:text-red-500'}`}
+                >
+                    <Heart size={20} className={isFavorite ? 'fill-current' : ''} />
                 </button>
                 
                 <div className="flex flex-col min-w-0 pr-4">
-                    <h3 className="font-serif font-black text-[var(--color-text)] text-base truncate">
+                    <h3 className="font-serif font-black text-[var(--color-text)] text-sm md:text-base leading-tight break-words">
                         {product.name}
                     </h3>
-                    <span className="text-[9px] font-black tracking-widest uppercase text-[var(--color-text)]/50 mt-1">
-                        100% ORGANIC HERITAGE
+                    <span className="text-[8px] md:text-[9px] font-black tracking-widest uppercase text-[var(--color-text)]/50 mt-1">
+                        Pure Village Heritage
                     </span>
                 </div>
             </div>
 
             {/* Middle Section: Quantities */}
-            <div className="flex flex-col items-start px-8 shrink-0">
-                <span className="text-[9px] font-black tracking-[0.2em] uppercase text-[var(--color-text)]/60 mb-3">
+            <div className="flex flex-col items-start w-full md:w-auto md:px-8 shrink-0 py-2 md:py-0 border-t md:border-t-0 md:border-l border-[var(--color-border)]/20 md:border-transparent">
+                <span className="text-[8px] md:text-[9px] font-black tracking-[0.2em] uppercase text-[var(--color-text)]/40 md:text-[var(--color-text)]/60 mb-2 md:mb-3">
                     SELECT QUANTITY
                 </span>
                 <div className="flex flex-wrap gap-2 max-w-[320px]">
@@ -100,9 +115,9 @@ const ProductListRow = ({ product }: { product: Product }) => {
                             <button
                                 key={qty.label}
                                 onClick={() => setSelectedQty(qty)}
-                                className={`px-4 py-1.5 rounded-full text-[10px] font-bold tracking-wider transition-all border
+                                className={`px-3 py-1.5 md:px-4 md:py-1.5 rounded-full text-[9px] md:text-[10px] font-bold tracking-wider transition-all border
                                     ${active 
-                                        ? 'bg-[#3b7167] text-white border-[#3b7167]' 
+                                        ? 'bg-[#3b7167] text-white border-[#3b7167] shadow-sm' 
                                         : 'bg-transparent text-[var(--color-text)]/60 border-[var(--color-border)] hover:border-[#3b7167]/50'
                                     }
                                 `}
@@ -115,23 +130,147 @@ const ProductListRow = ({ product }: { product: Product }) => {
             </div>
 
             {/* Right Section: Actions */}
-            <div className="flex items-center gap-8 shrink-0 pl-10 border-l border-[var(--color-border)]/50">
-                <div className="flex flex-col items-center min-w-[80px]">
-                    <span className="font-serif font-black text-2xl text-[#3b7167]">
-                        {currency}{finalPrice}
+            <div className="flex items-center justify-between md:justify-end gap-6 md:gap-8 w-full md:w-auto md:shrink-0 md:pl-10 border-t md:border-t-0 md:border-l border-[var(--color-border)]/50 pt-3 md:pt-0">
+                <div className="flex flex-col items-start md:items-center min-w-[70px] md:min-w-[80px]">
+                    <span className="font-serif font-black text-xl md:text-2xl text-[#3b7167]">
+                        {formatPrice(Number(finalPrice))}
                     </span>
-                    <span className="text-[8px] font-black tracking-[0.2em] uppercase text-[var(--color-text)]/50 mt-1">
+                    <span className="text-[7px] md:text-[8px] font-black tracking-[0.2em] uppercase text-[var(--color-text)]/50 mt-0.5 md:mt-1">
                         FREE DELIVERY
                     </span>
                 </div>
 
-                <div className="w-10 h-10 rounded-full bg-[#1dd76b] flex items-center justify-center text-white cursor-pointer hover:bg-[#16bd5d] transition-colors shadow-lg shadow-[#1dd76b]/20">
-                    <MessageCircle size={20} />
+                <button 
+                    onClick={() => {
+                        if (!isLoggedIn) {
+                            openAuthModal();
+                            return;
+                        }
+                        addToCart({
+                            _id: product._id,
+                            name: product.name,
+                            price: Number(product.price),
+                            image: imageUrl || '',
+                            quantity: 1,
+                            selectedWeight: selectedQty.label,
+                        });
+                    }}
+                    className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#111111] hover:bg-black text-white px-6 md:px-8 py-3 md:py-3.5 rounded-full transition-all group shadow-lg md:shadow-xl"
+                >
+                    <ShoppingBag size={14} className="text-white/80 group-hover:text-white transition-colors" />
+                    <span className="text-[9px] md:text-[10px] font-black tracking-[0.2em] md:tracking-[0.3em] uppercase">Add to Cart</span>
+                </button>
+            </div>
+        </div>
+    );
+};
+
+interface GroupedProductListRowProps {
+    product: Product;
+    isFavorite: boolean;
+    toggleFavorite: (productId: string) => void;
+    variants: Product[];
+    baseName: string;
+}
+
+const GroupedProductListRow = ({ product, isFavorite, toggleFavorite, variants, baseName }: GroupedProductListRowProps) => {
+    const [selectedId, setSelectedId] = useState(product._id);
+    const activeProduct = variants.find(v => v._id === selectedId) || product;
+
+    const { addToCart, formatPrice } = useCart();
+    const { isLoggedIn, openAuthModal } = useAuth();
+
+    const basePrice = activeProduct.price || 0.00;
+    const finalPrice = basePrice.toFixed(2);
+
+    const hasImage = activeProduct.media_url || (activeProduct.images && activeProduct.images.length > 0);
+    const imageUrl = activeProduct.media_url || (activeProduct.images && activeProduct.images[0]);
+
+    return (
+        <div className="w-full flex flex-col md:flex-row items-center justify-between bg-white border border-[var(--color-border)] rounded-[1.5rem] md:rounded-[2rem] p-4 md:px-6 md:py-5 shadow-sm hover:shadow-md transition-shadow gap-4 md:gap-0">
+            {/* Left Section */}
+            <div className="flex items-center gap-4 md:gap-6 min-w-0 w-full md:w-5/12">
+                <div className="w-16 h-16 bg-[#eaf4ec] rounded-2xl flex items-center justify-center shrink-0 border border-[#c4e3cb] overflow-hidden">
+                    {hasImage ? (
+                        <img src={imageUrl} alt={baseName} className="w-full h-full object-cover" />
+                    ) : (
+                        <Leaf className="text-[#84a98c]" size={24} />
+                    )}
+                </div>
+                
+                <button 
+                    onClick={(e) => {
+                        e.stopPropagation();
+                        toggleFavorite(activeProduct._id);
+                    }}
+                    className={`transition-colors shrink-0 ${isFavorite ? 'text-red-500' : 'text-[var(--color-text)]/40 hover:text-red-500'}`}
+                >
+                    <Heart size={20} className={isFavorite ? 'fill-current' : ''} />
+                </button>
+                
+                <div className="flex flex-col min-w-0 flex-1 pr-4">
+                    <h3 className="font-serif font-black text-[var(--color-text)] text-sm md:text-lg leading-tight break-words">
+                        {baseName}
+                    </h3>
+                    <span className="text-[8px] md:text-[9px] font-black tracking-widest uppercase text-[var(--color-text)]/50 mt-1">
+                        Pure Village Heritage
+                    </span>
+                </div>
+            </div>
+
+            {/* Middle Section: Dropdown */}
+            <div className="flex flex-col items-start w-full md:w-3/12 md:px-6 shrink-0 py-2 md:py-0 border-t md:border-t-0 md:border-l border-[var(--color-border)]/20">
+                <span className="text-[8px] md:text-[9px] font-black tracking-[0.2em] uppercase text-[var(--color-text)]/40 md:text-[var(--color-text)]/60 mb-2 md:mb-3">
+                    SELECT VARIANT
+                </span>
+                <div className="relative w-full min-w-[140px]">
+                    <select
+                        value={selectedId}
+                        onChange={(e) => setSelectedId(e.target.value)}
+                        className="bg-transparent text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border border-[var(--color-border)] focus:border-[#3b7167] outline-none appearance-none cursor-pointer hover:bg-[var(--color-surface)] transition-colors w-full"
+                    >
+                        {variants.map((v) => (
+                            <option key={v._id} value={v._id}>
+                                {extractVariantName(v.name)}
+                            </option>
+                        ))}
+                    </select>
+                    <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+                        <Leaf size={10} />
+                    </div>
+                </div>
+            </div>
+
+            {/* Right Section */}
+            <div className="flex items-center justify-between md:justify-end gap-6 md:gap-8 w-full md:w-auto md:shrink-0 md:pl-10 border-t md:border-t-0 md:border-l border-[var(--color-border)]/50 pt-3 md:pt-0">
+                <div className="flex flex-col items-start md:items-center min-w-[70px] md:min-w-[80px]">
+                    <span className="font-serif font-black text-xl md:text-2xl text-[#3b7167]">
+                        {formatPrice(Number(finalPrice))}
+                    </span>
+                    <span className="text-[7px] md:text-[8px] font-black tracking-[0.2em] uppercase text-[var(--color-text)]/50 mt-0.5 md:mt-1">
+                        FREE DELIVERY
+                    </span>
                 </div>
 
-                <button className="flex items-center gap-3 bg-[#111111] hover:bg-black text-white px-8 py-3.5 rounded-full transition-all group shadow-xl">
-                    <ShoppingBag size={16} className="text-white/80 group-hover:text-white transition-colors" />
-                    <span className="text-[10px] font-black tracking-[0.3em] uppercase">Add to Cart</span>
+                <button 
+                    onClick={() => {
+                        if (!isLoggedIn) {
+                            openAuthModal();
+                            return;
+                        }
+                        addToCart({
+                            _id: activeProduct._id.split('_var_')[0],
+                            name: activeProduct.name,
+                            price: Number(activeProduct.price),
+                            image: imageUrl || '',
+                            quantity: 1,
+                            selectedWeight: extractVariantName(activeProduct.name),
+                        });
+                    }}
+                    className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#111111] hover:bg-black text-white px-6 md:px-8 py-3 md:py-3.5 rounded-full transition-all group shadow-lg md:shadow-xl"
+                >
+                    <ShoppingBag size={14} className="text-white/80 group-hover:text-white transition-colors" />
+                    <span className="text-[9px] md:text-[10px] font-black tracking-[0.2em] md:tracking-[0.3em] uppercase">Add to Cart</span>
                 </button>
             </div>
         </div>
@@ -148,14 +287,16 @@ export default function CategoriesPage() {
     const [allProducts, setAllProducts] = useState<Product[]>([]);
     const [currentParent, setCurrentParent] = useState<DbCategory | null>(null);
     const [loading, setLoading] = useState(true);
+    const [favorites, setFavorites] = useState<string[]>([]);
+    const { openAuthModal } = useAuth();
     const containerRef = useRef<HTMLDivElement>(null);
 
     const fetchAllData = async () => {
         setLoading(true);
         try {
             const [categoriesRes, productsRes] = await Promise.all([
-                fetch(`${API_URL}/categories/`),
-                fetch(`${API_URL}/products/`)
+                fetch(`${API_URL}/categories/?_cb=${new Date().getTime()}`),
+                fetch(`${API_URL}/products/?_cb=${new Date().getTime()}`)
             ]);
 
             const categoriesData = await categoriesRes.json();
@@ -180,8 +321,56 @@ export default function CategoriesPage() {
         }
     };
 
+    const fetchFavorites = async () => {
+        const token = localStorage.getItem('access_token');
+        if (!token) return;
+        try {
+            const res = await fetch(`${API_URL}/favorites/`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (res.ok) {
+                const data = await res.json(); // API returns IDs
+                setFavorites(data);
+            }
+        } catch (err) {
+            console.error('Error fetching favorites:', err);
+        }
+    };
+
+    const toggleFavorite = async (productId: string) => {
+        const token = localStorage.getItem('access_token');
+        if (!token) {
+            openAuthModal();
+            return;
+        }
+
+        const isFavorite = favorites.includes(productId);
+        try {
+            if (isFavorite) {
+                const res = await fetch(`${API_URL}/favorites/${productId}/`, {
+                    method: 'DELETE',
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                if (res.ok) setFavorites(prev => prev.filter(id => id !== productId));
+            } else {
+                const res = await fetch(`${API_URL}/favorites/`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ product_id: productId })
+                });
+                if (res.ok) setFavorites(prev => [...prev, productId]);
+            }
+        } catch (err) {
+            console.error('Toggle favorite error:', err);
+        }
+    };
+
     useEffect(() => {
         fetchAllData();
+        fetchFavorites();
         window.scrollTo(0, 0);
     }, [parentId]);
 
@@ -246,7 +435,7 @@ export default function CategoriesPage() {
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -20 }}
                                     onClick={() => navigate(-1)}
-                                    className="absolute left-0 top-1.5 md:top-4 flex items-center gap-2 text-[var(--color-text)]/40 hover:text-[var(--color-primary)] font-black uppercase tracking-widest text-[9px] transition-colors"
+                                    className="md:absolute left-0 top-1.5 md:top-4 flex items-center gap-2 text-[var(--color-text)]/40 hover:text-[var(--color-primary)] font-black uppercase tracking-widest text-[9px] transition-colors mb-4 md:mb-0"
                                 >
                                     <ArrowLeft size={14} />
                                     <span className="hidden md:inline">Back to {currentParent?.parent_id ? 'Subcategories' : 'Main Collections'}</span>
@@ -265,7 +454,7 @@ export default function CategoriesPage() {
                                 <div className="flex flex-col items-center">
                                     <h1 className="text-3xl md:text-5xl font-black text-[var(--color-text)] mb-1 font-serif uppercase leading-tight">
                                         {currentParent ? (
-                                            <>Explore <span className="italic text-[var(--color-primary)]">{currentParent.name}</span></>
+                                            <><span className="italic text-[var(--color-primary)]">{currentParent.name}</span></>
                                         ) : (
                                             <>Our <span className="italic text-[var(--color-primary)]">Collections</span></>
                                         )}
@@ -395,18 +584,45 @@ export default function CategoriesPage() {
                                 
                             {/* Products List (if applicable) - ONLY shows if NO more categories exist for a pure drill-down experience */}
                             {categories.length === 0 && filteredProducts && filteredProducts.length > 0 && (
-                                <div className="flex flex-col gap-4 mt-12 px-6 w-full max-w-[1400px] mx-auto overflow-x-auto pb-8">
-                                    <div className="min-w-[1100px] flex flex-col gap-5">
-                                        {filteredProducts.map((product) => (
-                                            <motion.div
-                                                key={product.id}
-                                                initial={{ opacity: 0, x: -20 }}
-                                                animate={{ opacity: 1, x: 0 }}
-                                                transition={{ duration: 0.5 }}
-                                            >
-                                                <ProductListRow product={product} />
-                                            </motion.div>
-                                        ))}
+                                <div className="mt-12 px-2 md:px-6 w-full max-w-[1400px] mx-auto pb-8">
+                                    <div className="flex flex-col gap-4 md:gap-5">
+                                        {(() => {
+                                            const grouped = groupProductsWithVariants(filteredProducts);
+                                            return grouped.map((group) => {
+                                                if (group.variants.length > 1) {
+                                                    return (
+                                                        <motion.div
+                                                            key={group.baseName}
+                                                            initial={{ opacity: 0, x: -20 }}
+                                                            animate={{ opacity: 1, x: 0 }}
+                                                            transition={{ duration: 0.5 }}
+                                                        >
+                                                            <GroupedProductListRow 
+                                                                product={group.defaultProduct} 
+                                                                variants={group.variants}
+                                                                baseName={group.baseName}
+                                                                isFavorite={favorites.includes(group.defaultProduct._id)} 
+                                                                toggleFavorite={toggleFavorite}
+                                                            />
+                                                        </motion.div>
+                                                    );
+                                                }
+                                                return (
+                                                    <motion.div
+                                                        key={group.defaultProduct._id}
+                                                        initial={{ opacity: 0, x: -20 }}
+                                                        animate={{ opacity: 1, x: 0 }}
+                                                        transition={{ duration: 0.5 }}
+                                                    >
+                                                        <StandardProductListRow 
+                                                            product={group.defaultProduct} 
+                                                            isFavorite={favorites.includes(group.defaultProduct._id)} 
+                                                            toggleFavorite={toggleFavorite}
+                                                        />
+                                                    </motion.div>
+                                                );
+                                            });
+                                        })()}
                                     </div>
                                 </div>
                             )}
