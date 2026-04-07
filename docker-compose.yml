@@ -19,7 +19,7 @@ services:
       dockerfile: Dockerfile
     container_name: vdfoods_backend
     restart: always
-    command: gunicorn --bind 0.0.0.0:8000 core.wsgi:application
+    command: gunicorn --bind 0.0.0.0:8000 --forwarded-allow-ips='*' core.wsgi:application
     volumes:
       - ./Veediptha_Website-backend:/app
       - shared_media:/app/media

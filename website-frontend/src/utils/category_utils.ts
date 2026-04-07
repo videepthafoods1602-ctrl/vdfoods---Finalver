@@ -66,6 +66,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
     'samber powder': '/assets/categories/InstantSamber.png',
     '6 months': '/assets/categories/BF6.png',
     '8 months': '/assets/categories/BF8.png',
+    '12 months': '/assets/categories/BF12.png',
     '2 years': '/assets/categories/BF2Y.png',
     '4 years': '/assets/categories/BF4Y.png',
     'ready to eat': '/assets/categories/Readytoeat.jpeg',
@@ -91,6 +92,8 @@ const CATEGORY_IMAGES: Record<string, string> = {
     'pasta & noodles': '/assets/categories/pasta_noodles_collection_hero_1774757897086.png',
     'natural sweeteners': '/assets/categories/natural_sweeteners_hero_1774757913510.png',
     'soup & ganji': '/assets/categories/soup_ganji_hero_1774757930273.png',
+    "kid's combo": '/assets/categories/KidsCombo.png',
+    "kids combo": '/assets/categories/KidsCombo.png',
 };
 
 const DEFAULT_IMAGES = [
