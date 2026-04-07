@@ -69,9 +69,9 @@ export const detectLocation = async (): Promise<LocationData> => {
 
     // Ultimate fallback if both Native and IP fail
     return {
-        country_code: 'IN',
-        country_name: 'India',
-        currency: 'INR'
+        country_code: 'US',
+        country_name: 'United States',
+        currency: 'USD'
     };
 };
 
