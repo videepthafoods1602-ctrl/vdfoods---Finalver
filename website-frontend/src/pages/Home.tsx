@@ -127,7 +127,7 @@ export default function Home() {
                             <div className="text-left">
                                 <p className="text-[9px] font-black uppercase tracking-[0.2em] text-white/50 leading-none mb-1">Village Harvested for</p>
                                 <p className="text-sm font-serif font-black text-white leading-none uppercase tracking-widest">
-                                    {locationData?.city ? `${locationData.city}, ` : ''}{locationData?.country_name || 'Detecting Location...'}
+                                    {locationData?.country_name || 'Detecting Location...'}
                                 </p>
                             </div>
                         </button>
