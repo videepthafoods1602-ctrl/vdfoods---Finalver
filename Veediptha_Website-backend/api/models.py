@@ -64,7 +64,7 @@ class Category(models.Model):
 
 class MainCategory(models.Model):
     id = ObjectIdAutoField(primary_key=True)
-    shop_type = models.CharField(max_length=50, default="Normal") # "Premium" or "Normal"
+    shop_type = models.CharField(max_length=50, default="Normal", db_column="shop") # "Premium" or "Normal"
     name = models.CharField(max_length=255)
     slug = models.SlugField(unique=True)
     banner_image = models.CharField(max_length=500, blank=True, null=True)

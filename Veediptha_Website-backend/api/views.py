@@ -110,7 +110,7 @@ class CategoryListView(APIView):
         
         for m in main_cats:
             # Determine Tier 1 parent based on explicit shop_type
-            shop_type_lower = m.shop_type.lower()
+            shop_type_lower = (m.shop_type or "").lower()
             
             if "premium" in shop_type_lower:
                 shop_parent_id = "shop_premium"
@@ -123,7 +123,7 @@ class CategoryListView(APIView):
             
             subs = []
             for s in sub_cats:
-                if s.main_category_id == m.id:
+                if str(s.main_category_id) == str(m.id):
                     subs.append({
                         "id": str(s.id),
                         "_id": str(s.id),
