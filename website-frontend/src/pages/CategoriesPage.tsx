@@ -451,7 +451,7 @@ export default function CategoriesPage() {
                                         className="md:absolute left-0 top-1.5 md:top-4 flex items-center gap-2 text-[var(--color-text)]/40 hover:text-[var(--color-primary)] font-black uppercase tracking-widest text-[9px] transition-colors text-left"
                                     >
                                         <ArrowLeft size={14} />
-                                        <span className="hidden md:inline">Back to {currentParent?.parent_id ? 'Subcategories' : 'Main Collections'}</span>
+                                            <span className="hidden md:inline">Back to {currentParent?.parent_id ? 'Categories' : 'Shops'}</span>
                                         <span className="md:hidden">Back</span>
                                     </button>
                                 </motion.div>
@@ -470,11 +470,11 @@ export default function CategoriesPage() {
                                         {currentParent ? (
                                             <><span className="italic text-[var(--color-primary)]">{formatName(currentParent.name)}</span></>
                                         ) : (
-                                            <>Our <span className="italic text-[var(--color-primary)]">Collections</span></>
+                                            <>Our <span className="italic text-[var(--color-primary)]">Shops</span></>
                                         )}
                                     </h1>
                                     <p className="text-sm md:text-base text-[var(--color-text)]/70 max-w-2xl mx-auto font-medium">
-                                        {currentParent?.description || (parentId ? 'Detailed sub-categories for your selection.' : 'Select a category below to explore our specific harvests.')}
+                                        {currentParent?.description || (parentId ? 'Detailed categories for your selection.' : 'Select a shop below to explore our specific harvests.')}
                                     </p>
                                 </div>
                             </motion.div>
@@ -483,9 +483,9 @@ export default function CategoriesPage() {
 
                     {/* Category Display Logic */}
                     {!parentId ? (
-                        /* Top Level: Arched Gallery Portals (Dynamic Unique Layout) */
+                        /* Top Level: Arched Gallery Portals (Shop Selection) */
                         <div className="w-full pt-6 md:pt-12 pb-40 px-4 md:px-6">
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:flex lg:flex-row items-center justify-center gap-6 md:gap-8 max-w-5xl mx-auto">
+                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 items-center justify-center gap-12 md:gap-16 max-w-4xl mx-auto">
                                 {categories.map((category, index) => {
                                     const isPremium = category.name.toLowerCase().includes('premium');
                                     let shopImage = isPremium ? '/assets/categories/vds_elite_heritage.png' : '/assets/categories/vds_base_heritage.png';
@@ -502,15 +502,14 @@ export default function CategoriesPage() {
                                             animate={{ 
                                                 opacity: 1, 
                                                 scale: 1, 
-                                                y: [0, -15, 0], // Breathing animation
+                                                y: 0,
                                             }}
                                             transition={{ 
-                                                opacity: { duration: 1.5, delay: index * 0.4 },
-                                                scale: { duration: 1.5, delay: index * 0.4 },
-                                                y: { duration: 6, repeat: Infinity, ease: "easeInOut" }
+                                                opacity: { duration: 1.5, delay: index * 0.1 },
+                                                scale: { duration: 1.5, delay: index * 0.1 },
                                             }}
-                                            whileHover={{ scale: 1.05, rotateY: index === 0 ? 5 : -5, z: 50 }}
-                                            className="relative w-full max-w-[280px] md:max-w-[320px] lg:flex-1 cursor-pointer perspective-1000 group mx-auto"
+                                            whileHover={{ scale: 1.05, z: 50 }}
+                                            className="relative w-full cursor-pointer perspective-1000 group mx-auto"
                                             onClick={() => handleCategoryClick(category)}
                                         >
                                             <div 
@@ -532,7 +531,7 @@ export default function CategoriesPage() {
                                                 {/* Floating Label revealed on hover */}
                                                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-700 flex flex-col justify-end p-12">
                                                     <p className="text-[10px] font-black uppercase tracking-[0.6em] text-[var(--color-secondary)] mb-4 translate-y-4 group-hover:translate-y-0 transition-transform duration-700">
-                                                        {isPremium ? "Elite Harvest" : "Native Harvest"}
+                                                        Visit Shop
                                                     </p>
                                                     <h3 className="text-3xl font-serif font-black text-white uppercase tracking-widest translate-y-4 group-hover:translate-y-0 transition-transform duration-700 delay-100">
                                                         {formatName(category.name)}
@@ -550,24 +549,20 @@ export default function CategoriesPage() {
                     ) : (
                         /* Sub Level: Boutique Editorial Gallery (Jewelry-Box Grid) */
                         <div className="w-full py-4 px-2 md:px-0">
-                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-6 max-w-[1400px] mx-auto">
+                            <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6 max-w-[1400px] mx-auto">
                                 {categories.map((category, index) => {
                                     const catImage = resolveImageUrl(category.media_url, category.name);
-                                    
-                                    // 🎭 Editorial Staggering: Mixed aspect ratios
-                                    const isPortrait = (index % 3 === 0);
-                                    
                                     return (
                                         <motion.div
                                             key={category.id}
                                             initial={{ opacity: 0, y: 30 }}
                                             whileInView={{ opacity: 1, y: 0 }}
                                             viewport={{ once: true, margin: "-50px" }}
-                                            transition={{ duration: 0.8, delay: (index % 4) * 0.1 }}
+                                            transition={{ duration: 0.8, delay: (index % 6) * 0.1 }}
                                             className="relative group cursor-pointer"
                                             onClick={() => handleCategoryClick(category)}
                                         >
-                                            <div className={`relative ${isPortrait ? 'aspect-[3/4]' : 'aspect-[4/5]'} rounded-[2rem] overflow-hidden shadow-xl border border-[var(--color-secondary)]/10 bg-[var(--color-panel)] transition-all duration-700 group-hover:shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)]`}>
+                                            <div className="relative aspect-[3/4] rounded-[2rem] overflow-hidden shadow-xl border border-[var(--color-secondary)]/10 bg-[var(--color-panel)] transition-all duration-700 group-hover:shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)]">
                                                 <img 
                                                     src={catImage}
                                                     alt={formatName(category.name)}

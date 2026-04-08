@@ -23,7 +23,7 @@ export const formatName = (name: string): string => {
         .replace(/\s+/g, ''); // remove spaces for matching
 
     if (lower.includes('vdspremium') || lower.includes('vdspremiumspecial') || lower.includes('vdsspremium')) {
-        return "Vd's Premium Special";
+        return "Vd's Premium Store";
     }
 
     // 2. Insert a space before any uppercase letter preceded by a lowercase letter or digit
