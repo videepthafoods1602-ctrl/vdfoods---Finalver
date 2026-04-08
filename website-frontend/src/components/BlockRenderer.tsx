@@ -5,7 +5,7 @@ import { cn } from '../utils/cn';
 import Magnetic from './Magnetic';
 
 const BlockRenderer: React.FC<{ block: Block }> = ({ block }) => {
-    const { type, content, styles, animations } = block;
+    const { type, content = {}, styles = {}, animations } = block;
 
     const isVisible = true;
 

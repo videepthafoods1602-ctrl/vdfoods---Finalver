@@ -7,19 +7,10 @@ import { useAuth } from '../context/AuthContext';
 import Header from '../components/Header';
 import { API_URL } from '../config';
 import { groupProductsWithVariants, extractVariantName } from '../utils/productUtils';
+import { formatName } from '../utils/category_utils';
+import type { Product } from '../types';
 
 
-interface Product {
-    _id: string;
-    name: string;
-    description: string;
-    price: number;
-    stock: number;
-    images: string[];
-    category_ids: string[];
-    attributes?: Record<string, any>;
-    is_active: boolean;
-}
 
 
 
@@ -193,7 +184,7 @@ export default function ProductsPage() {
                                                 : 'bg-[var(--color-panel)] text-[var(--color-text)]/40 border border-[var(--color-border)] hover:border-[var(--color-primary)]/30 hover:text-[var(--color-text)]'
                                                 }`}
                                         >
-                                            {cat.name}
+                                            {formatName(cat.name)}
                                         </button>
                                     ))}
                                 </div>
@@ -304,7 +295,7 @@ export default function ProductsPage() {
                                                                 >
                                                                     {group.variants.map((v) => (
                                                                         <option key={v._id} value={v._id}>
-                                                                            {extractVariantName(v.name)}
+                                                                            {extractVariantName(v)}
                                                                         </option>
                                                                     ))}
                                                                 </select>
@@ -316,7 +307,7 @@ export default function ProductsPage() {
                                                     ) : (
                                                         <div className="flex flex-col gap-1">
                                                             <div className="text-[8px] font-black uppercase tracking-[0.2em] text-[var(--color-text)]/40">Pack Size</div>
-                                                            <span className="text-[10px] font-black">{extractVariantName(product.name)}</span>
+                                                            <span className="text-[10px] font-black">{extractVariantName(product)}</span>
                                                         </div>
                                                     )}
                                                 </div>
@@ -339,14 +330,14 @@ export default function ProductsPage() {
                                                                 openAuthModal();
                                                                 return;
                                                             }
-                                                            addToCart({
-                                                                _id: product._id,
-                                                                name: product.name,
-                                                                price: product.price,
-                                                                image: product.images[0],
-                                                                quantity: 1,
-                                                                selectedWeight: extractVariantName(product.name)
-                                                            });
+                                                                addToCart({
+                                                                    _id: product._id,
+                                                                    name: product.name,
+                                                                    price: product.price,
+                                                                    image: product.images?.[0] || '',
+                                                                    quantity: 1,
+                                                                    selectedWeight: extractVariantName(product)
+                                                                });
                                                         }}
                                                         className="h-12 w-12 md:h-14 md:w-14 bg-[var(--color-primary)] text-white rounded-2xl flex items-center justify-center hover:scale-110 active:scale-95 transition-all shadow-lg shadow-[var(--color-primary)]/20"
                                                     >

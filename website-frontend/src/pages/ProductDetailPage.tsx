@@ -12,27 +12,7 @@ import { groupProductsWithVariants, extractVariantName } from '../utils/productU
 
 
 
-interface Product {
-    _id: string;
-    name: string;
-    description: string;
-    price: number;
-    images: string[];
-    category_ids: string[];
-    stock: number;
-    is_active: boolean;
-    attributes?: {
-        ingredients?: string[];
-        allergens?: string[];
-        nutrition?: Record<string, string>;
-    };
-    analytics?: {
-        total_views: number;
-        current_watching: number;
-        favorites_count: number;
-        cart_adds: number;
-    };
-}
+import type { Product } from '../types';
 
 
 // ProductDetailPage.tsx now uses Tailwind classes for responsiveness.
@@ -71,7 +51,7 @@ export default function ProductDetailPage() {
                 const allProdData = await allProdRes.json();
 
                 setProduct(prodData);
-                setSelectedWeight(extractVariantName(prodData.name));
+                setSelectedWeight(extractVariantName(prodData));
 
                 if (Array.isArray(allProdData)) {
                     // Find variant siblings
@@ -202,12 +182,15 @@ export default function ProductDetailPage() {
         <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] font-sans pt-20">
             <Header />
 
-            <main className="max-w-7xl mx-auto px-6 pt-10">
-                {/* Back Button for Desktop */}
-                <div className="hidden lg:block mb-8">
+            <main className="max-w-7xl mx-auto px-6 pt-10 text-left">
+                {/* Back Button */}
+                <div className="mb-8 w-full flex justify-start">
                     <Link to="/products" className="inline-flex items-center gap-2 text-[var(--color-text)]/70 hover:text-[var(--color-primary)] transition-colors">
                         <ArrowLeft size={18} />
-                        <span className="text-xs font-black uppercase tracking-widest text-[var(--color-text)]/70">Back to Market</span>
+                        <span className="text-xs font-black uppercase tracking-widest text-[var(--color-text)]/70">
+                            <span className="hidden md:inline">Back to Market</span>
+                            <span className="md:hidden">Back</span>
+                        </span>
                     </Link>
                 </div>
 
@@ -225,16 +208,16 @@ export default function ProductDetailPage() {
                                     initial={{ opacity: 0 }}
                                     animate={{ opacity: 1 }}
                                     exit={{ opacity: 0 }}
-                                    src={resolveImageUrl(product.images[activeImage])}
+                                    src={resolveImageUrl(product?.images?.[activeImage])}
                                     alt={product.name}
                                     className="w-full h-full object-cover"
                                 />
                             </AnimatePresence>
                         </motion.div>
 
-                        {product.images.length > 1 && (
+                        {(product?.images || []).length > 1 && (
                             <div className="grid grid-cols-4 gap-4">
-                                {product.images.map((img, idx) => (
+                                {(product?.images || []).map((img, idx) => (
                                     <button
                                         key={idx}
                                         className={`aspect-square rounded-2xl overflow-hidden border-2 transition-all ${activeImage === idx ? 'border-[var(--color-primary)] opacity-100 scale-105' : 'border-transparent opacity-60'}`}
@@ -311,12 +294,12 @@ export default function ProductDetailPage() {
                                                         : 'bg-[var(--color-panel)] text-[var(--color-text)]/40 border border-[var(--color-border)] hover:border-[var(--color-primary)]/30'
                                                 }`}
                                             >
-                                                {extractVariantName(v.name)}
+                                                {extractVariantName(v)}
                                             </Link>
                                         ))
                                     ) : (
                                         <div className="px-6 py-2.5 rounded-full bg-[var(--color-panel)] text-[var(--color-text)]/70 border border-[var(--color-border)] text-[10px] font-black uppercase tracking-widest">
-                                            {extractVariantName(product.name)}
+                                            {extractVariantName(product)}
                                         </div>
                                     )}
                                 </div>
@@ -348,7 +331,7 @@ export default function ProductDetailPage() {
                                             _id: product._id,
                                             name: product.name,
                                             price: Number(product.price),
-                                            image: resolveImageUrl(product.images[0]),
+                                            image: resolveImageUrl(product?.images?.[0]),
                                             quantity: quantity,
                                             selectedWeight: selectedWeight,
                                             attributes: product.attributes
@@ -394,7 +377,7 @@ export default function ProductDetailPage() {
                         <div className="bg-[var(--color-panel)] p-8 rounded-[2rem] border border-[var(--color-border)]">
                             {product.attributes?.ingredients && product.attributes.ingredients.length > 0 ? (
                                 <div className="flex flex-wrap gap-2">
-                                    {product.attributes.ingredients.map((ing, i) => (
+                                    {product.attributes.ingredients.map((ing: string, i: number) => (
                                         <span key={i} className="px-4 py-2 bg-[var(--color-panel)] border border-[var(--color-border)] rounded-full text-xs font-bold text-[var(--color-text)]/90">{ing}</span>
                                     ))}
                                 </div>
@@ -437,7 +420,7 @@ export default function ProductDetailPage() {
                             <Link to={`/products/${p._id}`} key={p._id} className="group">
                                 <motion.div initial={{ opacity: 0, y: 10 }} whileInView={{ opacity: 1, y: 0 }} transition={{ delay: idx * 0.1 }}>
                                     <div className="aspect-square rounded-3xl overflow-hidden bg-[var(--color-panel)] border border-[var(--color-border)] mb-4 group-hover:border-[var(--color-primary)]/50 transition-all">
-                                        <img src={resolveImageUrl(p.images[0])} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" />
+                                        <img src={resolveImageUrl(p.images?.[0])} alt={p.name} className="w-full h-full object-cover group-hover:scale-105 transition-all duration-500" />
                                     </div>
                                     <h3 className="text-sm font-bold text-[var(--color-text)] mb-1 group-hover:text-[var(--color-primary)] transition-colors truncate">{p.name}</h3>
                                     <div className="text-[var(--color-primary)] font-black text-sm">{formatPrice(p.price)}</div>

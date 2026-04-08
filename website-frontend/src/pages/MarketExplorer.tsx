@@ -6,7 +6,7 @@ import axios from 'axios';
 import { API_URL } from '../config';
 import Header from '../components/Header';
 import { useCart } from '../context/CartContext';
-import { deduplicateBy, getCategoryImage } from '../utils/category_utils';
+import { deduplicateBy, getCategoryImage, formatName } from '../utils/category_utils';
 
 interface Category {
     id: string;
@@ -31,11 +31,12 @@ interface Product {
     price: number;
     description: string;
     images: string[];
+    dropdown?: string;
 }
 
 const MarketExplorer: React.FC = () => {
     const navigate = useNavigate();
-    const { } = useCart();
+    const { formatPrice } = useCart();
     const [searchParams] = useSearchParams();
     const [categories, setCategories] = useState<Category[]>([]);
     const [loading, setLoading] = useState(true);
@@ -146,16 +147,16 @@ const MarketExplorer: React.FC = () => {
                         )}
                         <h1 className="text-4xl md:text-6xl font-black font-serif italic tracking-tight">
                             {viewLevel === 1 ? 'Discovery Lobby' : 
-                             viewLevel === 2 ? selectedMain?.name : 
-                             selectedSub?.name || selectedMain?.name}
+                             viewLevel === 2 ? (selectedMain ? formatName(selectedMain.name) : '') : 
+                             formatName(selectedSub?.name || selectedMain?.name || '')}
                         </h1>
                     </div>
                     <p className="text-lg opacity-60 max-w-2xl">
                         {viewLevel === 1 
                             ? 'Our artisanal collections rooted in tradition, crafted for the modern wellness seeker.' 
                             : viewLevel === 2 
-                            ? selectedMain?.banner_details?.description || `Explore our refined collection of ${selectedMain?.name}.`
-                            : `Curated collection of ${selectedSub?.name || selectedMain?.name} essentials.`}
+                            ? selectedMain?.banner_details?.description || `Explore our refined collection of ${selectedMain ? formatName(selectedMain.name) : ''}.`
+                            : `Curated collection of ${formatName(selectedSub?.name || selectedMain?.name || '')} essentials.`}
                     </p>
                 </div>
 
@@ -201,7 +202,7 @@ const MarketExplorer: React.FC = () => {
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
                                     
                                     <div className="absolute inset-0 flex flex-col justify-end p-10 z-10 text-white">
-                                        <h2 className="text-3xl font-black mb-2 font-serif">{cat.name}</h2>
+                                        <h2 className="text-3xl font-black mb-2 font-serif">{formatName(cat.name)}</h2>
                                         <div className="flex items-center gap-2 text-white/60 font-bold uppercase tracking-widest text-xs">
                                             {cat.subcategories?.length || 0} Specialties <ChevronRight size={16} />
                                         </div>
@@ -233,9 +234,9 @@ const MarketExplorer: React.FC = () => {
                                                 alt={sub.name} 
                                             />
                                         </div>
-                                        <h3 className="text-lg font-black leading-tight mb-2">{sub.name}</h3>
+                                        <h3 className="text-lg font-black leading-tight mb-2">{formatName(sub.name)}</h3>
                                         <p className="text-xs text-[var(--color-text-dim)] line-clamp-2">
-                                            Explore our curated list of {sub.name.toLowerCase()} products.
+                                            Explore our curated list of {(sub.name ? formatName(sub.name) : '').toLowerCase()} products.
                                         </p>
                                     </motion.div>
                                 ))}
@@ -275,7 +276,7 @@ const MarketExplorer: React.FC = () => {
                                                 <h3 className="text-xl font-black mb-2 line-clamp-1">{product.name}</h3>
                                                 <p className="text-sm opacity-60 mb-6 line-clamp-2 min-h-[40px]">{product.description || 'Traditional ingredients prepared with contemporary standards.'}</p>
                                                 <div className="flex items-center justify-between">
-                                                    <span className="text-2xl font-black text-amber-500">₹{product.price || '---'}</span>
+                                                    <span className="text-2xl font-black text-amber-500">{formatPrice(product.price || 0)}</span>
                                                     <button 
                                                         disabled
                                                         className="px-6 py-2 bg-[var(--color-border)] text-[var(--color-text-dim)] rounded-full text-xs font-bold uppercase tracking-wider cursor-not-allowed opacity-50"

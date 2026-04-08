@@ -5,7 +5,7 @@ import BlockRenderer from './BlockRenderer';
 import { cn } from '../utils/cn';
 
 const SectionRenderer: React.FC<{ section: Section }> = ({ section }) => {
-    const { layout, styles, blocks, background_type, background_video, background_gradient, background_animation } = section;
+    const { layout, styles = {}, blocks, background_type, background_video, background_gradient, background_animation } = section;
 
     const renderBackground = () => {
         switch (background_type) {

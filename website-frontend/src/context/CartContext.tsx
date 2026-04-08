@@ -30,6 +30,7 @@ interface CartContextType {
     locationData: any;
     setLocationData: (data: any) => void;
     refreshLocation: () => Promise<void>;
+    isDetectingLocation: boolean;
 }
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
@@ -43,11 +44,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
     const [locationData, setLocationData] = useState<any>(() => {
         const saved = localStorage.getItem('user_location');
-        return saved ? JSON.parse(saved) : null;
+        return saved ? JSON.parse(saved) : { country_code: 'US', country_name: 'USA', currency: 'USD' };
     });
     const [exchangeRate, setExchangeRate] = useState<number>(() => {
         return Number(localStorage.getItem('usd_inr_rate')) || 80.0;
     });
+    const [isDetectingLocation, setIsDetectingLocation] = useState(false);
 
     const { user } = useAuth();
 
@@ -58,13 +60,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             if (!force && sessionDetected && locationData) {
                 console.log('Location already detected in this session.');
             } else if (!localStorage.getItem('user_location_override') || force) {
-                const locData = await detectLocation();
-                setLocationData(locData);
-                setDetectedCurrency(locData.currency);
-                localStorage.setItem('user_location', JSON.stringify(locData));
-                localStorage.setItem('detected_currency', locData.currency);
-                sessionStorage.setItem('location_detected', 'true');
-                console.log('Location updated via IP/Geo:', locData.country_name, locData.currency);
+                setIsDetectingLocation(true);
+                try {
+                    const locData = await detectLocation();
+                    setLocationData(locData);
+                    setDetectedCurrency(locData.currency);
+                    localStorage.setItem('user_location', JSON.stringify(locData));
+                    localStorage.setItem('detected_currency', locData.currency);
+                    sessionStorage.setItem('location_detected', 'true');
+                    console.log('Location updated via IP/Geo:', locData.country_name, locData.currency);
+                } finally {
+                    setIsDetectingLocation(false);
+                }
             }
 
             // 2. Fetch Latest Exchange Rate (Refresh once a day or on mount)
@@ -84,13 +91,18 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }, [user]);
 
     const refreshLocation = async () => {
-        const locData = await detectLocation();
-        setLocationData(locData);
-        setDetectedCurrency(locData.currency);
-        localStorage.setItem('user_location', JSON.stringify(locData));
-        localStorage.setItem('detected_currency', locData.currency);
-        sessionStorage.setItem('location_detected', 'true');
-        console.log('Location force-refreshed via IP/Geo:', locData.country_name, locData.currency);
+        setIsDetectingLocation(true);
+        try {
+            const locData = await detectLocation();
+            setLocationData(locData);
+            setDetectedCurrency(locData.currency);
+            localStorage.setItem('user_location', JSON.stringify(locData));
+            localStorage.setItem('detected_currency', locData.currency);
+            sessionStorage.setItem('location_detected', 'true');
+            console.log('Location force-refreshed via IP/Geo:', locData.country_name, locData.currency);
+        } finally {
+            setIsDetectingLocation(false);
+        }
     };
 
     const syncCart = async (items: CartItem[]) => {
@@ -213,7 +225,8 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
             formatPrice,
             locationData,
             setLocationData,
-            refreshLocation
+            refreshLocation,
+            isDetectingLocation
         }}>
             {children}
         </CartContext.Provider>

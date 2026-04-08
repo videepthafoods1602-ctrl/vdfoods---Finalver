@@ -62,7 +62,7 @@ export default function FavoritesPage() {
     };
 
     return (
-        <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] font-sans pt-32 pb-20 px-6">
+        <div className="min-h-screen bg-[var(--color-bg)] text-[var(--color-text)] font-sans pt-44 pb-20 px-6">
             <Header />
             <div className="max-w-7xl mx-auto">
                 <Link to="/" className="inline-flex items-center gap-2 text-[var(--color-text)]/70 hover:text-[var(--color-primary)] transition-colors mb-8">

@@ -6,8 +6,9 @@ import Header from '../components/Header';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { API_URL } from '../config';
-import { getCategoryImage } from '../utils/category_utils';
+import { getCategoryImage, formatName } from '../utils/category_utils';
 import { groupProductsWithVariants, extractVariantName } from '../utils/productUtils';
+import type { Product } from '../types';
 
 
 interface DbCategory {
@@ -20,28 +21,15 @@ interface DbCategory {
     subcategories?: any[];
 }
 
-interface Product {
-    _id: string;
-    id?: string;
-    name: string;
-    description: string;
-    price: number;
-    media_url?: string;
-    weight?: string;
-    images: string[];
-    subcategory_id?: string;
-    category_ids: string[];
-    stock: number;
-    is_active: boolean;
-}
 
 interface ProductListRowProps {
     product: Product;
     isFavorite: boolean;
     toggleFavorite: (productId: string) => void;
+    hideImage?: boolean;
 }
 
-const StandardProductListRow = ({ product, isFavorite, toggleFavorite }: ProductListRowProps) => {
+const StandardProductListRow = ({ product, isFavorite, toggleFavorite, hideImage }: ProductListRowProps) => {
     const isLiquid = product.name.toLowerCase().match(/(oil|juice|syrup|squash|drops|liquid|kanji|soda|fizz)/);
     
     const quantities = isLiquid ? [
@@ -68,7 +56,7 @@ const StandardProductListRow = ({ product, isFavorite, toggleFavorite }: Product
     const basePrice = product.price || 0.00;
     const finalPrice = (basePrice * selectedQty.mult).toFixed(2);
     
-    const hasImage = product.media_url || (product.images && product.images.length > 0);
+    const hasImage = !hideImage && (product.media_url || (product.images && product.images.length > 0));
     const imageUrl = product.media_url || (product.images && product.images[0]);
 
     return (
@@ -103,29 +91,50 @@ const StandardProductListRow = ({ product, isFavorite, toggleFavorite }: Product
                 </div>
             </div>
 
-            {/* Middle Section: Quantities */}
-            <div className="flex flex-col items-start w-full md:w-auto md:px-8 shrink-0 py-2 md:py-0 border-t md:border-t-0 md:border-l border-[var(--color-border)]/20 md:border-transparent">
+        <div className="flex flex-col items-start w-full md:w-auto md:px-8 shrink-0 py-2 md:py-0 border-t md:border-t-0 md:border-l border-[var(--color-border)]/20 md:border-transparent">
                 <span className="text-[8px] md:text-[9px] font-black tracking-[0.2em] uppercase text-[var(--color-text)]/40 md:text-[var(--color-text)]/60 mb-2 md:mb-3">
-                    SELECT QUANTITY
+                    {product.attributes?.dropdown_options?.length ? 'SELECT VARIANT' : 'SELECT QUANTITY'}
                 </span>
                 <div className="flex flex-wrap gap-2 max-w-[320px]">
-                    {quantities.map(qty => {
-                        const active = selectedQty.label === qty.label;
-                        return (
-                            <button
-                                key={qty.label}
-                                onClick={() => setSelectedQty(qty)}
-                                className={`px-3 py-1.5 md:px-4 md:py-1.5 rounded-full text-[9px] md:text-[10px] font-bold tracking-wider transition-all border
-                                    ${active 
-                                        ? 'bg-[#3b7167] text-white border-[#3b7167] shadow-sm' 
-                                        : 'bg-transparent text-[var(--color-text)]/60 border-[var(--color-border)] hover:border-[#3b7167]/50'
+                    {product.attributes?.dropdown_options?.length ? (
+                        <div className="relative w-full min-w-[140px]">
+                            <select
+                                value={selectedQty.label}
+                                onChange={(e) => {
+                                    const found = product.attributes?.dropdown_options?.indexOf(e.target.value);
+                                    if (found !== undefined && found !== -1) {
+                                        setSelectedQty({ label: e.target.value, mult: 1 });
                                     }
-                                `}
+                                }}
+                                className="bg-transparent text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl border border-[var(--color-border)] focus:border-[#3b7167] outline-none appearance-none cursor-pointer hover:bg-[var(--color-surface)] transition-colors w-full"
                             >
-                                {qty.label}
-                            </button>
-                        );
-                    })}
+                                {product.attributes.dropdown_options.map((opt: string) => (
+                                    <option key={opt} value={opt}>{opt}</option>
+                                ))}
+                            </select>
+                            <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none opacity-40">
+                                <Leaf size={10} />
+                            </div>
+                        </div>
+                    ) : (
+                        quantities.map(qty => {
+                            const active = selectedQty.label === qty.label;
+                            return (
+                                <button
+                                    key={qty.label}
+                                    onClick={() => setSelectedQty(qty)}
+                                    className={`px-3 py-1.5 md:px-4 md:py-1.5 rounded-full text-[9px] md:text-[10px] font-bold tracking-wider transition-all border
+                                        ${active 
+                                            ? 'bg-[#3b7167] text-white border-[#3b7167] shadow-sm' 
+                                            : 'bg-transparent text-[var(--color-text)]/60 border-[var(--color-border)] hover:border-[#3b7167]/50'
+                                        }
+                                    `}
+                                >
+                                    {qty.label}
+                                </button>
+                            );
+                        })
+                    )}
                 </div>
             </div>
 
@@ -149,7 +158,7 @@ const StandardProductListRow = ({ product, isFavorite, toggleFavorite }: Product
                         addToCart({
                             _id: product._id,
                             name: product.name,
-                            price: Number(product.price),
+                            price: Number(finalPrice),
                             image: imageUrl || '',
                             quantity: 1,
                             selectedWeight: selectedQty.label,
@@ -171,9 +180,10 @@ interface GroupedProductListRowProps {
     toggleFavorite: (productId: string) => void;
     variants: Product[];
     baseName: string;
+    hideImage?: boolean;
 }
 
-const GroupedProductListRow = ({ product, isFavorite, toggleFavorite, variants, baseName }: GroupedProductListRowProps) => {
+const GroupedProductListRow = ({ product, isFavorite, toggleFavorite, variants, baseName, hideImage }: GroupedProductListRowProps) => {
     const [selectedId, setSelectedId] = useState(product._id);
     const activeProduct = variants.find(v => v._id === selectedId) || product;
 
@@ -183,7 +193,7 @@ const GroupedProductListRow = ({ product, isFavorite, toggleFavorite, variants, 
     const basePrice = activeProduct.price || 0.00;
     const finalPrice = basePrice.toFixed(2);
 
-    const hasImage = activeProduct.media_url || (activeProduct.images && activeProduct.images.length > 0);
+    const hasImage = !hideImage && (activeProduct.media_url || (activeProduct.images && activeProduct.images.length > 0));
     const imageUrl = activeProduct.media_url || (activeProduct.images && activeProduct.images[0]);
 
     return (
@@ -231,7 +241,7 @@ const GroupedProductListRow = ({ product, isFavorite, toggleFavorite, variants, 
                     >
                         {variants.map((v) => (
                             <option key={v._id} value={v._id}>
-                                {extractVariantName(v.name)}
+                                {extractVariantName(v)}
                             </option>
                         ))}
                     </select>
@@ -264,7 +274,7 @@ const GroupedProductListRow = ({ product, isFavorite, toggleFavorite, variants, 
                             price: Number(activeProduct.price),
                             image: imageUrl || '',
                             quantity: 1,
-                            selectedWeight: extractVariantName(activeProduct.name),
+                            selectedWeight: extractVariantName(activeProduct),
                         });
                     }}
                     className="flex-1 md:flex-none flex items-center justify-center gap-2 bg-[#111111] hover:bg-black text-white px-6 md:px-8 py-3 md:py-3.5 rounded-full transition-all group shadow-lg md:shadow-xl"
@@ -422,25 +432,29 @@ export default function CategoriesPage() {
         <div ref={containerRef} className="relative bg-[var(--color-bg)] text-[var(--color-text)] font-sans min-h-screen selection:bg-[var(--color-primary)] selection:text-white pb-32">
             <Header />
 
-            <main className="relative z-10 pt-24 pb-12 px-6">
+            <main className="relative z-10 pt-44 pb-12 px-6">
                 <div className="max-w-7xl mx-auto w-full">
 
                     {/* Header Section: Back Button + Title */}
-                    <div className="relative mb-6 flex flex-col items-center">
+                    <div className="relative mb-6 flex flex-col items-start md:items-center">
                         {/* Breadcrumbs / Back button */}
                         <AnimatePresence>
                             {parentId && (
-                                <motion.button
+                                <motion.div
                                     initial={{ opacity: 0, x: -20 }}
                                     animate={{ opacity: 1, x: 0 }}
                                     exit={{ opacity: 0, x: -20 }}
-                                    onClick={() => navigate(-1)}
-                                    className="md:absolute left-0 top-1.5 md:top-4 flex items-center gap-2 text-[var(--color-text)]/40 hover:text-[var(--color-primary)] font-black uppercase tracking-widest text-[9px] transition-colors mb-4 md:mb-0"
+                                    className="w-full flex justify-start mb-4 md:mb-0"
                                 >
-                                    <ArrowLeft size={14} />
-                                    <span className="hidden md:inline">Back to {currentParent?.parent_id ? 'Subcategories' : 'Main Collections'}</span>
-                                    <span className="md:hidden">Back</span>
-                                </motion.button>
+                                    <button
+                                        onClick={() => navigate(-1)}
+                                        className="md:absolute left-0 top-1.5 md:top-4 flex items-center gap-2 text-[var(--color-text)]/40 hover:text-[var(--color-primary)] font-black uppercase tracking-widest text-[9px] transition-colors text-left"
+                                    >
+                                        <ArrowLeft size={14} />
+                                        <span className="hidden md:inline">Back to {currentParent?.parent_id ? 'Subcategories' : 'Main Collections'}</span>
+                                        <span className="md:hidden">Back</span>
+                                    </button>
+                                </motion.div>
                             )}
                         </AnimatePresence>
 
@@ -454,7 +468,7 @@ export default function CategoriesPage() {
                                 <div className="flex flex-col items-center">
                                     <h1 className="text-3xl md:text-5xl font-black text-[var(--color-text)] mb-1 font-serif uppercase leading-tight">
                                         {currentParent ? (
-                                            <><span className="italic text-[var(--color-primary)]">{currentParent.name}</span></>
+                                            <><span className="italic text-[var(--color-primary)]">{formatName(currentParent.name)}</span></>
                                         ) : (
                                             <>Our <span className="italic text-[var(--color-primary)]">Collections</span></>
                                         )}
@@ -511,7 +525,7 @@ export default function CategoriesPage() {
                                                         const img = e.target as HTMLImageElement;
                                                         if (img.src !== fallbackImage) img.src = fallbackImage;
                                                     }}
-                                                    alt={category.name}
+                                                    alt={formatName(category.name)}
                                                     className="w-full h-full object-cover object-top transition-all duration-[2000ms] group-hover:scale-110 group-hover:brightness-110"
                                                 />
                                                 
@@ -521,7 +535,7 @@ export default function CategoriesPage() {
                                                         {isPremium ? "Elite Harvest" : "Native Harvest"}
                                                     </p>
                                                     <h3 className="text-3xl font-serif font-black text-white uppercase tracking-widest translate-y-4 group-hover:translate-y-0 transition-transform duration-700 delay-100">
-                                                        {category.name}
+                                                        {formatName(category.name)}
                                                     </h3>
                                                 </div>
                                             </div>
@@ -556,7 +570,7 @@ export default function CategoriesPage() {
                                             <div className={`relative ${isPortrait ? 'aspect-[3/4]' : 'aspect-[4/5]'} rounded-[2rem] overflow-hidden shadow-xl border border-[var(--color-secondary)]/10 bg-[var(--color-panel)] transition-all duration-700 group-hover:shadow-[0_30px_70px_-15px_rgba(0,0,0,0.3)]`}>
                                                 <img 
                                                     src={catImage}
-                                                    alt={category.name}
+                                                    alt={formatName(category.name)}
                                                     className="w-full h-full object-cover transition-transform duration-[2000ms] group-hover:scale-110"
                                                 />
                                                 
@@ -572,7 +586,7 @@ export default function CategoriesPage() {
                                                             </span>
                                                         </div>
                                                         <h2 className="text-sm md:text-xl font-serif font-black text-white uppercase tracking-tight leading-tight group-hover:text-[var(--color-primary)] transition-colors line-clamp-2">
-                                                            {category.name}
+                                                            {formatName(category.name)}
                                                         </h2>
                                                     </div>
                                                 </div>
@@ -589,7 +603,8 @@ export default function CategoriesPage() {
                                         {(() => {
                                             const grouped = groupProductsWithVariants(filteredProducts);
                                             return grouped.map((group) => {
-                                                if (group.variants.length > 1) {
+                                                const hasDropdown = group.variants.some(v => v.attributes?.dropdown_options?.length) || group.variants.length > 1;
+                                                if (hasDropdown) {
                                                     return (
                                                         <motion.div
                                                             key={group.baseName}
@@ -603,6 +618,10 @@ export default function CategoriesPage() {
                                                                 baseName={group.baseName}
                                                                 isFavorite={favorites.includes(group.defaultProduct._id)} 
                                                                 toggleFavorite={toggleFavorite}
+                                                                hideImage={
+                                                                    currentParent?.name.toLowerCase().includes('premium special') && 
+                                                                    group.baseName.toLowerCase().includes('chocolate')
+                                                                }
                                                             />
                                                         </motion.div>
                                                     );
@@ -618,6 +637,10 @@ export default function CategoriesPage() {
                                                             product={group.defaultProduct} 
                                                             isFavorite={favorites.includes(group.defaultProduct._id)} 
                                                             toggleFavorite={toggleFavorite}
+                                                            hideImage={
+                                                                currentParent?.name.toLowerCase().includes('premium special') && 
+                                                                group.defaultProduct.name.toLowerCase().includes('chocolate')
+                                                            }
                                                         />
                                                     </motion.div>
                                                 );

@@ -1,192 +1,92 @@
-export interface Product {
-    _id: string;
-    name: string;
-    description: string;
-    price: number;
-    stock: number;
-    images: string[];
-    category_ids: string[];
-    attributes?: Record<string, any>;
-    is_active: boolean;
-}
-
-export interface ProductGroup {
-    baseName: string;
-    variants: Product[];
-    defaultProduct: Product;
-}
-
-const BASE_PRODUCT_LINES = [
-    "Nippattu",
-    "Dark Chocolate",
-    "Payasam",
-    "Podi",
-    "Pickle",
-    "Powder",
-    "Cookies",
-    "Biscuits",
-    "Mixture",
-    "Chakli",
-    "Chalki",
-    "Arisalu",
-    "Aresalu",
-    "Adhirasam",
-    "Kajjikayyi",
-    "KajjiKai",
-    "Laddu",
-    "Laddoo",
-    "Laddo",
-    "Masala",
-    "Elaichi Powder"
-];
+import type { Product, ProductGroup } from '../types';
 
 /**
- * Groups products by their base name if they follow a variation pattern.
- * Delimiters supported: Names containing (...) or "... , Variation"
- * ONLY groups if the variant part looks like a weight or size.
+ * Groups products by name and processes the 'dropdown' field to create variants.
  */
 export const groupProductsWithVariants = (products: Product[]): ProductGroup[] => {
-    const groups: Record<string, ProductGroup> = {};
-    
-    // Pattern 1: "Base Name (Variant)"
-    const bracketRegex = /^(.*?)\s*\((.*?)\)\s*$/;
+    const groups: ProductGroup[] = [];
+    const processedIds = new Set<string>();
 
-    // Cleanup specific database typo to ensure clean splits
+    if (!Array.isArray(products)) return [];
+
+    // Step 1: Normalize names to identify base products (e.g. "Honey 500g" -> "Honey")
+    const getBaseName = (name: string) => {
+        // Remove trailing weights/quantities (e.g. " 500g", " 1kg", " 100 ml", " (500g)")
+        return name.replace(/\s*\(?\d+\s*(g|kg|ml|l|packets|pcs|oz|lb)\)?\s*$/i, '').trim();
+    };
+
+    // Step 1: Identify Main Products and their variants
     products.forEach(p => {
-        if (p.name.includes("Dark Chocalate")) {
-            p.name = p.name.replace("Dark Chocalate", "Dark Chocolate");
-        }
-        if (p.name.includes("DarkChacolate")) {
-            p.name = p.name.replace("DarkChacolate", "Dark Chocolate");
-        }
-        if (p.name.includes("Aresalu")) {
-            p.name = p.name.replace("Aresalu", "Arisalu");
-        }
-        // Force fix the severely mangled Kajjikayyi DB entry so it splits into perfect flavors
-        if (p.name.includes("Kajjikayyi Jowar Dryfruit Jowar Sesame")) {
-            p.name = "Kajjikayyi Jowar Dryfruit Kajjikayyi Jowar Sesame Kajjikayyi Jowar Coconut VP Special Kajjikayyi Kapli Dryfruit Kajjikayyi Kapli Sesame Kajjikayyi Kapli Coconut VP Special";
-        }
-    });
-
-    products.forEach(product => {
-        // --- Squashed String Processor ---
-        if (product.name.length > 40) {
-            let matchedBase: string | null = null;
-            for (const baseKeyword of BASE_PRODUCT_LINES) {
-                const regex = new RegExp(baseKeyword, 'gi');
-                const matches = product.name.match(regex);
-                if (matches && matches.length > 1) {
-                    matchedBase = baseKeyword; // Use standard spelling
-                    break;
-                }
-            }
-
-            if (matchedBase) {
-                // Split the string, ignoring empty chunks
-                const pieces = product.name.split(new RegExp(`\\s*${matchedBase}\\s*`, 'i')).filter(Boolean);
+        const labels = p.attributes?.dropdown_options || [];
+        if (labels.length > 0) {
+            const parentImage = (p.images && p.images.length > 0) ? p.images[0] : p.media_url;
+            
+            // For each label, try to find a real product that matches the name
+            const syntheticVariants = labels.map((label, idx) => {
+                // Look for a real product with this exact name in the filtered list
+                const realMatch = products.find(real => real.name.trim().toLowerCase() === label.trim().toLowerCase());
                 
-                const groupingKey = matchedBase;
-                if (!groups[groupingKey]) {
-                    groups[groupingKey] = {
-                        baseName: groupingKey,
-                        variants: [],
-                        defaultProduct: product
+                if (realMatch) {
+                    processedIds.add(realMatch._id);
+                    return {
+                        ...realMatch,
+                        weight: label // Use the dropdown label as the weight/variant name
                     };
                 }
-                
-                pieces.forEach((piece, idx) => {
-                    const cleanPiece = piece.trim();
-                    if (cleanPiece && cleanPiece.toLowerCase() !== matchedBase!.toLowerCase()) {
-                        groups[groupingKey].variants.push({
-                            ...product,
-                            _id: `${product._id}_var_${idx}`, // Synthetic ID
-                            name: `${matchedBase} ${cleanPiece}`
-                        });
-                    }
-                });
-                return; // End processing for this massively squashed string
-            }
+
+                // Fallback to synthetic if no real product found
+                return {
+                    ...p,
+                    _id: `${p._id}_var_${idx}`,
+                    images: p.images && p.images.length > 0 ? p.images : (p.media_url ? [p.media_url] : []),
+                    media_url: parentImage,
+                    weight: label, 
+                };
+            });
+
+            groups.push({
+                baseName: p.name,
+                variants: syntheticVariants,
+                defaultProduct: syntheticVariants[0]
+            });
+            processedIds.add(p._id);
         }
+    });
 
-        let baseName = product.name;
-        let isVariant = false;
+    // Step 2: Handle remaining products using name-based grouping (Case B)
+    const productsByBaseName = new Map<string, Product[]>();
+    products.filter(p => !processedIds.has(p._id)).forEach(p => {
+        const bName = getBaseName(p.name);
+        if (!productsByBaseName.has(bName)) productsByBaseName.set(bName, []);
+        productsByBaseName.get(bName)?.push(p);
+    });
 
-        const bracketMatch = product.name.match(bracketRegex);
-
-        if (bracketMatch) {
-            baseName = bracketMatch[1].trim();
-            isVariant = true;
+    productsByBaseName.forEach((variants, bName) => {
+        if (variants.length > 1) {
+            groups.push({
+                baseName: bName,
+                variants: variants,
+                defaultProduct: variants[0]
+            });
         } else {
-            // Smart Keyword Grouping for irregular names
-            for (const baseKeyword of BASE_PRODUCT_LINES) {
-                // Determine if this core keyword exists in the name and the name has other words
-                if (product.name.toLowerCase().includes(baseKeyword.toLowerCase()) && product.name.length > baseKeyword.length) {
-                    baseName = baseKeyword; // Capitalized cleanly
-                    isVariant = true;
-                    break;
-                }
-            }
+            const only = variants[0];
+            groups.push({
+                baseName: only.name,
+                variants: [only],
+                defaultProduct: only
+            });
         }
-
-        // Normalize grouping key (e.g., Laddoo -> Laddu)
-        let groupingKey = isVariant ? baseName : product.name;
-        if (groupingKey.toLowerCase().includes("laddo")) groupingKey = "Laddu";
-        if (groupingKey.toLowerCase().includes("arisalu") || groupingKey.toLowerCase().includes("aresalu")) groupingKey = "Arisalu";
-
-        if (!groups[groupingKey]) {
-            groups[groupingKey] = {
-                baseName: groupingKey,
-                variants: [],
-                defaultProduct: product
-            };
-        }
-        groups[groupingKey].variants.push(product);
+        variants.forEach(v => processedIds.add(v._id));
     });
 
-    return Object.values(groups).map(group => {
-        // Sort variants (weight-based naturally, alphabetical fallback)
-        group.variants.sort((a, b) => {
-            const getWeightValue = (name: string) => {
-                const varName = extractVariantName(name).toLowerCase();
-                const num = parseFloat(varName);
-                if (isNaN(num)) {
-                    // Alphabetic fallback for flavors
-                    return 0; // Return 0 to maintain relative order if not a weight, we will use localeCompare below
-                }
-                if (varName.includes('kg')) return num * 1000;
-                if (varName.includes('l')) return num * 1000;
-                return num;
-            };
-            const weightA = getWeightValue(a.name);
-            const weightB = getWeightValue(b.name);
-            if (weightA && weightB) return weightA - weightB;
-            
-            // Flavor/String fallback sorting
-            return extractVariantName(a.name).localeCompare(extractVariantName(b.name));
-        });
-        group.defaultProduct = group.variants[0];
-        return group;
-    });
+    return groups;
 };
 
 /**
  * Extracts the variant name for the dropdown label.
  */
-export const extractVariantName = (fullName: string): string => {
-    const bracketRegex = /^(.*?)\s*\((.*?)\)\s*$/;
-
-    const bracketMatch = fullName.match(bracketRegex);
-    if (bracketMatch) return bracketMatch[2].trim();
-
-    // Smart Keyword Grouping variant extraction
-    for (const baseKeyword of BASE_PRODUCT_LINES) {
-        if (fullName.toLowerCase().includes(baseKeyword.toLowerCase()) && fullName.length > baseKeyword.length) {
-            // Remove the base keyword (case insensitive) and trim remaining flavor/variant name
-            const variantStr = fullName.replace(new RegExp(baseKeyword, "ig"), "").trim();
-            // In case it was just something with an extra space or hyphen
-            return variantStr || fullName;
-        }
-    }
-
-    return fullName;
+export const extractVariantName = (product: Product | any): string => {
+    if (typeof product === 'string') return product;
+    // Prefer the synthetic weight/label we added, fallback to name
+    return product.weight || product.name;
 };

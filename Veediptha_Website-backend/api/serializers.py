@@ -156,6 +156,7 @@ class ProductSerializer(MongoSerializer):
     category_ids = serializers.ListField(child=serializers.CharField())
     subcategory_id = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     attributes = serializers.DictField()
+    dropdown = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     is_active = serializers.BooleanField(default=True)
 
 class ProductLiteSerializer(MongoSerializer):
@@ -169,6 +170,7 @@ class ProductLiteSerializer(MongoSerializer):
     category_ids = serializers.ListField(child=serializers.CharField())
     subcategory_id = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     attributes = serializers.DictField(required=False, default=dict)
+    dropdown = serializers.CharField(required=False, allow_null=True, allow_blank=True)
     is_active = serializers.BooleanField(default=True)
 
 class CouponSerializer(MongoSerializer):

@@ -1,9 +1,11 @@
 import { useState, useEffect } from 'react';
 import { ShoppingCart, Search, Menu, ChevronRight, Star } from 'lucide-react';
 import { Link } from 'react-router-dom';
+import { useCart } from '../context/CartContext';
 
 const SlurrpHome = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
+  const { formatPrice } = useCart();
 
   const heroSlides = [
     {
@@ -109,7 +111,7 @@ const SlurrpHome = () => {
       </style>
 
       <div className="bg-[#F8BE15] text-black text-center py-2 px-4 font-bold text-sm tracking-wide sticky top-0 z-50">
-        🎉 FREE DELIVERY ON ALL ORDERS ABOVE ₹499! USE CODE: SLURVP 🎉
+        🎉 FREE DELIVERY ON ALL ORDERS ABOVE {formatPrice(499)}! USE CODE: SLURVP 🎉
       </div>
 
       <header className="bg-white py-4 px-6 md:px-12 flex items-center justify-between shadow-sm sticky top-[36px] z-40">
@@ -237,8 +239,8 @@ const SlurrpHome = () => {
                   {product.name}
                 </h3>
                 <div className="flex items-center gap-2 mb-4">
-                  <span className="font-black text-xl text-[#C32025]">₹{product.price}</span>
-                  <span className="text-sm text-gray-400 line-through font-semibold">₹{product.originalPrice}</span>
+                  <span className="font-black text-xl text-[#C32025]">{formatPrice(product.price)}</span>
+                  <span className="text-sm text-gray-400 line-through font-semibold">{formatPrice(product.originalPrice)}</span>
                 </div>
                 
                 <button className="w-full bg-[#121212] hover:bg-[#C32025] text-white font-bold py-3 px-4 rounded-xl flex items-center justify-center gap-2 transition-colors">

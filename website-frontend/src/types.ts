@@ -1,150 +1,165 @@
-// Types shared across components
-
-export interface BlockContent {
-    heading?: string;
-    body?: string;
-    url?: string;
-    thumbnail?: string;
-    muted?: boolean;
-    loop?: boolean;
-    autoPlay?: boolean;
-    alt?: string;
-    caption?: string;
-    text?: string;
-    link?: string;
-    linkType?: 'internal' | 'external';
-    alignment?: 'left' | 'center' | 'right';
+export interface Product {
+    _id: string;
+    id?: string;
+    name: string;
+    description: string;
+    price: number;
+    weight?: string;
+    media_url?: string;
+    image?: string;
+    images?: string[];
+    subcategory_id?: string;
+    category_ids: string[];
+    stock: number;
+    is_active: boolean;
+    analytics?: {
+        views: number;
+        sales: number;
+        revenue: number;
+        current_watching?: number;
+        favorites_count?: number;
+    };
+    attributes?: {
+        ingredients?: string[];
+        allergens?: string[];
+        nutrition?: {
+            calories: string;
+            protein: string;
+            carbohydrates: string;
+            fat: string;
+        };
+        dropdown_options?: string[];
+        shop?: string;
+    };
 }
 
-export interface BlockStyles {
-    textAlign?: 'left' | 'center' | 'right';
-    color?: string;
-    fontSize?: string;
-    backgroundColor?: string;
+export interface Category {
+    _id: string;
+    id?: string;
+    name: string;
+    description: string;
+    media_url?: string;
+    parent_id?: string;
+    subcategories?: any[];
 }
 
-export interface BlockAnimations {
-    type?: 'fade' | 'slide-up' | 'slide-down' | 'zoom' | 'bounce' | 'none';
-    delay?: number;
-    duration?: number;
+export interface SubCategory {
+    _id: string;
+    id: string;
+    category_id: string;
+    name: string;
+    description: string;
+    media_url?: string;
 }
 
-export interface BlockVisibility {
-    mobile?: boolean;
-    tablet?: boolean;
-    desktop?: boolean;
+export interface User {
+    _id: string;
+    id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    phone?: string;
+    address?: string;
+}
+
+export interface ProductGroup {
+    baseName: string;
+    variants: Product[];
+    defaultProduct: Product;
+}
+
+export interface Promotion {
+    id: string;
+    _id?: string;
+    title: string;
+    description: string;
+    discount_percent?: number;
+    is_active: boolean;
+    image_url?: string;
+    product_id?: string;
+    
+    // Complex fields for PromotionSection
+    background_type?: 'image' | 'video' | 'gradient' | 'color';
+    background_image?: string;
+    background_video?: string;
+    background_gradient?: {
+        type: string;
+        angle: string;
+        stops: string[];
+    };
+    background_color?: string;
+    subtitle?: string;
+    subtitle_size?: string;
+    subtitle_font?: string;
+    subtitle_color?: string;
+    title_size?: string;
+    title_font?: string;
+    title_color?: string;
+    ctaLink: string;
+    ctaText: string;
+    coupon_code?: string;
 }
 
 export interface Block {
     id: string;
-    type: 'text' | 'image' | 'video' | 'button' | 'product_list';
-    content: BlockContent;
-    styles: BlockStyles;
-    animations: BlockAnimations;
-    visibility: BlockVisibility;
-}
-
-export interface SectionStyles {
-    backgroundColor?: string;
-    padding?: string;
-    backgroundImage?: string;
+    type: string;
+    content: any;
+    styles: any;
+    animations?: {
+        type?: string;
+        delay?: number;
+        duration?: number;
+    };
 }
 
 export interface Section {
     id: string;
-    layout: 'boxed' | 'full' | 'split';
-    background_type?: 'color' | 'image' | 'video' | 'gradient' | 'animation';
+    type: string;
+    settings: any;
+    blocks: Block[];
+    layout?: 'full' | 'split' | string;
+    styles?: {
+        backgroundImage?: string;
+        backgroundColor?: string;
+    };
+    background_type?: 'video' | 'gradient' | 'animation' | 'image' | 'color';
     background_video?: {
         url: string;
-        muted: boolean;
-        loop: boolean;
-        opacity: number;
+        muted?: boolean;
+        opacity?: number;
     };
     background_gradient?: {
-        type: 'linear' | 'radial';
-        angle: string;
+        type: 'radial' | 'linear';
+        angle?: string;
         stops: string[];
     };
     background_animation?: {
-        type: 'none' | 'mesh' | 'fluid' | 'particles';
-        intensity: 'low' | 'medium' | 'high';
+        type: 'mesh' | string;
     };
-    styles: SectionStyles;
-    blocks: Block[];
 }
 
 export interface Page {
-    _id?: string;
     id?: string;
+    _id?: string;
     name: string;
     slug: string;
-    is_active: boolean;
     sections: Section[];
-    layout?: string;
 }
 
 export interface StoryContent {
-    type: 'text' | 'image' | 'video' | 'heading' | 'subheading';
+    type: 'heading' | 'subheading' | 'text' | 'image' | 'video';
     content?: string;
     url?: string;
     caption?: string;
 }
 
-export interface Hero {
-    _id?: string;
-    title: string;
-    subtitle: string;
-    description: string;
-    backgroundImage: string;
-    videoUrl?: string; // Optional video background
-    ctaText: string;
-    ctaLink: string;
-    secondaryCtaText: string;
-    secondaryCtaLink: string;
-}
-
 export interface Story {
     _id: string;
     title: string;
-    subtitle: string;
-    thumbnailImage: string;
-    heroImage: string;
     shortExcerpt: string;
+    heroImage: string;
+    thumbnailImage: string;
+    subtitle?: string;
     fullStoryContent: StoryContent[];
     is_active: boolean;
-}
-
-export interface Promotion {
-    _id?: string;
-    id?: string;
-    title: string;
-    subtitle?: string;
-    description?: string;
-    ctaText: string;
-    ctaLink: string;
-
-    // Typography
-    title_font?: string;
-    title_size?: string;
-    title_color?: string;
-    subtitle_font?: string;
-    subtitle_size?: string;
-    subtitle_color?: string;
-
-    // Targeting
-    target_type?: 'all' | 'category' | 'product';
-    target_ids?: string[];
-    coupon_code?: string;
-
-    background_type: 'color' | 'image' | 'video' | 'gradient';
-    background_image?: string;
-    background_video?: string;
-    background_color?: string;
-    background_gradient?: {
-        type: 'linear' | 'radial';
-        angle: string;
-        stops: string[];
-    };
-    is_active: boolean;
-    order: number;
 }

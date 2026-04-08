@@ -47,14 +47,15 @@ class ProductListView(generics.ListAPIView):
         queryset = Product.objects.all()
         category_id = self.request.query_params.get('category')
         if category_id:
-            # Check if this ID is a MainCategory or SubCategory
-            # We handle filtering by checking subcategory_id OR category_ids (for legacy)
-            from .models import SubCategory
-            # If it's a subcategory ID, exact match subcategory_id
-            # Wait, best to just filter by subcategory_id OR category_ids containing it
-            
-            # Simple python level filter if no advanced MongoDB querying:
-            queryset = queryset.filter(subcategory_id=category_id)
+            # Filter products where category_id matches exactly subcategory_id 
+            # OR exists within the category_ids list
+            # We fetch everything and filter in Python to avoid MongoDB-backend specific query limitations
+            all_prods = list(queryset)
+            filtered_prods = [
+                p for p in all_prods 
+                if (p.subcategory_id == category_id) or (category_id in (p.category_ids or []))
+            ]
+            return filtered_prods
         return queryset
 
 class ProductDetailView(generics.RetrieveAPIView):
@@ -112,14 +113,11 @@ class CategoryListView(APIView):
             # Determine Tier 1 parent based on explicit shop_type
             shop_type_lower = (m.shop_type or "").lower()
             
+            # Simple, non-hardcoded routing based purely on database field
             if "premium" in shop_type_lower:
                 shop_parent_id = "shop_premium"
-            elif "normal" in shop_type_lower or "vd's store" in shop_type_lower:
-                shop_parent_id = "shop_normal"
             else:
-                # Fallback for ambiguous cases
-                premium_names = ["millet rice varieties", "mix for cooked millet", "ready to eat", "ready to mix", "spreads", "tools", "vd's premium special", "women's friendly"]
-                shop_parent_id = "shop_premium" if m.name.lower().strip() in premium_names else "shop_normal"
+                shop_parent_id = "shop_normal"
             
             subs = []
             for s in sub_cats:
@@ -375,30 +373,14 @@ class SeedAllView(APIView):
                 if m_name.lower().strip() == 'gut friendly':
                     m_name = "Gut friendly fruit drinks"
 
-                # --- EXPLICIT SHOP ASSIGNMENT LISTS (USER TRUTH) ---
-                normal_list = [
-                    "At Pocket", "Baby Food", "Biryani Mix", "Body relax", "Candies",
-                    "Cooking oil / Cold pressed oil", "Dark Chocolate", "DB Friendly (Diabetic friendly)",
-                    "DryFruit Special", "Energy Drinks", "Gut friendly fruit drinks", "Herbal Tea",
-                    "Instant Chutneys & Podi's", "Milk mix - dry fruit mix", "Millet Rice Varieties",
-                    "Mix for Cooked Millet", "mouth freshner", "Our kitchen premium masalas", "Pickles",
-                    "Premium Roti", "Pulao Mix", "Ready to cook", "Ready to eat", "Ready to Mix", "Spreads"
-                ]
-                premium_list = [
-                    "Millet Rice Varieties", "Mix for Cooked Millet", "Ready to eat", "Ready to Mix",
-                    "Spreads", "Tools", "VD's Premium Special", "Women's Friendly"
-                ]
-
                 # Determine which shops this category should belong to
                 target_shops = []
-                m_name_lower = m_name.lower().strip()
                 
-                # Check for inclusion in lists (case-insensitive)
-                in_normal = any(n.lower().strip() in m_name_lower or m_name_lower in n.lower().strip() for n in normal_list)
-                in_premium = any(p.lower().strip() in m_name_lower or m_name_lower in p.lower().strip() for p in premium_list)
-                
-                if in_normal: target_shops.append("VD's Store")
-                if in_premium: target_shops.append("VD's Premium Store")
+                # Trust the raw_shop from Excel/DB or fall back to VD's Store
+                if raw_shop and "premium" in raw_shop.lower():
+                    target_shops.append("VD's Premium Store")
+                else:
+                    target_shops.append("VD's Store")
                 
                 # If NOT in either list, default to Excel's raw_shop
                 if not target_shops:

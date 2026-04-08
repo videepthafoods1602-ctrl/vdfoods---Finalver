@@ -10,10 +10,61 @@ export const deduplicateBy = (arr: any[], key: string) => {
     });
 };
 
+/**
+ * Formats a string by adding a space before capital letters (e.g., "DarkChocolate" -> "Dark Chocolate").
+ * Also handles specific brand overrides like "Vd's Premium".
+ */
+export const formatName = (name: string): string => {
+    if (!name) return "";
+    
+    // 1. Specialized overrides for the brand
+    const lower = name.toLowerCase().trim()
+        .replace(/["']/g, '') // remove quotes
+        .replace(/\s+/g, ''); // remove spaces for matching
+
+    if (lower.includes('vdspremium') || lower.includes('vdspremiumspecial') || lower.includes('vdsspremium')) {
+        return "Vd's Premium Special";
+    }
+
+    // 2. Insert a space before any uppercase letter preceded by a lowercase letter or digit
+    // and between two uppercase letters if the second is followed by lowercase (e.g. BABYFood -> BABY Food)
+    let formatted = name.trim()
+        .replace(/([a-z0-9])([A-Z])/g, '$1 $2')
+        .replace(/([A-Z])([A-Z][a-z])/g, '$1 $2');
+
+    // 3. Spelling and specific spacing corrections
+    if (formatted.toLowerCase().includes('horsegram')) {
+        formatted = formatted.replace(/Horsegram/gi, 'Horse Gram');
+    }
+    
+    // Common combined all-caps cases (heuristics for user reported "combined names")
+    const upNoSpace = formatted.toUpperCase().replace(/\s/g, '');
+    if (upNoSpace === 'BABYFOOD') formatted = 'BABY FOOD';
+    if (upNoSpace === 'BIRYANIMIX') formatted = 'BIRYANI MIX';
+    if (upNoSpace === 'BODYRELAX') formatted = 'BODY RELAX';
+
+    formatted = formatted
+        .replace(/Payasm/gi, 'Payasam')
+        .replace(/Horse GramPayasam/gi, 'Horse Gram Payasam')
+        .replace(/DarkChocolet/gi, 'Dark Chocolate')
+        .replace(/DarkChocolate/gi, 'Dark Chocolate')
+        .replace(/Dark Chocalate/gi, 'Dark Chocolate')
+        .replace(/Chocalate/gi, 'Chocolate')
+        .replace(/BeatHunger/gi, 'Beat Hunger')
+        .replace(/Gut Friendly fruit drinks/gi, 'Gut Friendly')
+        .replace(/Babyfood/gi, 'Baby Food')
+        .replace(/Pickel/gi, 'Pickle')
+        .replace(/Main Category/gi, 'Main Category')
+        .replace(/Sub Category/gi, 'Sub Category')
+        .replace(/\s+/g, ' ')
+        .trim();
+
+    return formatted;
+};
+
 const CATEGORY_IMAGES: Record<string, string> = {
     // --- HIGH PRIORITY BRAND OVERRIDES ---
-    'feel good lite': '/assets/vds_feel_good_lite.png',
-    'feel lite': '/assets/vds_feel_good_lite.png',
+    'feel good feel lite': '/assets/categories/vds_feel_good_feel_lite.png',
 
     // --- EXACT SPREADS MAPPING ---
     'vegan mayonnaise': '/assets/categories/vegan_mayonnaise.jpeg',
@@ -30,6 +81,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
     'baby food': '/assets/categories/vds_baby_food_main.jpg',
     'biryani mix': '/assets/categories/vds_biryani_mix_main.jpg',
     'body relax': '/assets/categories/vds_body_relax_main.jpg',
+    'beat hunger': '/assets/categories/vds_beat_hunger_sub.jpg',
     'candies': '/assets/categories/vds_candies_heritage_main.jpg',
     'cooking oil': '/assets/categories/cooking_oil_main.png',
     'cold pressed': '/assets/categories/cold_pressed_oil_sub.png',
@@ -44,6 +96,8 @@ const CATEGORY_IMAGES: Record<string, string> = {
     'milk mix': '/assets/categories/vds_milk_mix_main_heritage.png',
     'mouth freshner': '/assets/categories/vds_mouth_freshner_main.jpg',
     'pickles': '/assets/categories/vds_pickles_main.jpg',
+    'payasam': '/assets/categories/Payasam.png',
+    'payasma': '/assets/categories/Payasam.png',
     'pulao': '/assets/categories/vds_pulao_main.jpg',
     'ready to cook': '/assets/categories/vds_ready_to_cook_main.jpg',
     'roti': '/assets/categories/vds_roti_flour_main.jpg',
@@ -86,6 +140,7 @@ const CATEGORY_IMAGES: Record<string, string> = {
     'masala': '/assets/categories/masala_spices_collection_hero_1774757490910.png',
     'spice': '/assets/categories/masala_spices_collection_hero_1774757490910.png',
     'pickle': '/assets/categories/pickles_jar_hero_1774757530659.png',
+    'pickel': '/assets/categories/pickles_jar_hero_1774757530659.png',
     'spreads': '/assets/categories/spreads_mayonnaise_collection_hero_1774757436728.png',
     'sweets & savory': '/assets/categories/sweets_savory_collection_hero_1774757418927.png',
     'savouries': '/assets/categories/sweets_savory_collection_hero_1774757418927.png',
@@ -110,7 +165,7 @@ export const getCategoryImage = (name: string, currentUrl?: string) => {
     const rawLower = name.toLowerCase().trim();
     if (CATEGORY_IMAGES[rawLower]) return CATEGORY_IMAGES[rawLower];
 
-    // Step 1: Normalize (Remove EVERYTHING but letters/numbers)
+    // Step 1: Normalize (Remove EVERYTHING but letters/numbers for flexible matching)
     const extremeNormalize = (s: string) => s.toLowerCase().replace(/[^a-z0-9]/g, '');
     const searchName = extremeNormalize(name);
 

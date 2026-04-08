@@ -27,6 +27,8 @@ import SmoothScroll from './components/SmoothScroll';
 import AuthModal from './components/AuthModal';
 import WhatsAppButton from './components/WhatsAppButton';
 
+import ScrollToTop from './components/ScrollToTop';
+
 function App() {
   return (
     <GoogleOAuthProvider clientId={GOOGLE_CLIENT_ID}>
@@ -35,6 +37,7 @@ function App() {
           <CartProvider>
             <SmoothScroll>
               <Router>
+                <ScrollToTop />
                 <AuthModal />
                 <CartDrawer />
                 <div className="pb-24 lg:pb-0"> {/* Add padding for bottom nav on mobile */}

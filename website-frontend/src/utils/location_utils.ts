@@ -12,65 +12,107 @@ export interface LocationData {
 }
 
 export const detectLocation = async (): Promise<LocationData> => {
+    console.log('Starting location detection...');
+    
     // 1. Try Native Browser Geolocation
     if ('geolocation' in navigator) {
         try {
+            // Check permissions API if available (Chrome/Firefox/Android)
+            if (navigator.permissions && navigator.permissions.query) {
+                const status = await navigator.permissions.query({ name: 'geolocation' });
+                console.log('Geolocation permission status:', status.state);
+            }
+
             const position = await new Promise<GeolocationPosition>((resolve, reject) => {
                 navigator.geolocation.getCurrentPosition(resolve, reject, {
-                    timeout: 5000,
+                    enableHighAccuracy: true,
+                    timeout: 12000, // Increased to 12s for mobile GPS warm-up
                     maximumAge: 60000
                 });
             });
 
             const { latitude, longitude } = position.coords;
+            console.log('Got coordinates:', latitude, longitude);
 
             // Reverse Geocode using Nominatim API mapping
-            const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`);
+            const geoRes = await fetch(`https://nominatim.openstreetmap.org/reverse?format=json&lat=${latitude}&lon=${longitude}&zoom=10&addressdetails=1`, {
+                headers: { 'User-Agent': 'VideepthaFoodsLocBot/1.0' }
+            });
             const geoData = await geoRes.json();
 
             if (geoData && geoData.address) {
-                const countryCode = (geoData.address.country_code || '').toUpperCase();
-                const isIndia = countryCode === 'IN';
+                const country_code = (geoData.address.country_code || 'US').toUpperCase();
+                const isIndia = country_code === 'IN';
 
-                return {
-                    country_code: countryCode || 'US',
-                    country_name: geoData.address.country || 'United States',
-                    city: geoData.address.city || geoData.address.town || geoData.address.county,
-                    region: geoData.address.state,
+                const result: LocationData = {
+                    country_code,
+                    country_name: isIndia ? 'India' : (geoData.address.country || 'USA'),
+                    city: isIndia ? undefined : (geoData.address.city || geoData.address.town || geoData.address.county),
+                    region: isIndia ? undefined : geoData.address.state,
                     currency: isIndia ? 'INR' : 'USD',
                     coordinates: { latitude, longitude },
-                    display_name: geoData.display_name
+                    display_name: isIndia ? 'India' : (geoData.display_name || 'USA')
                 };
+                console.log('Native detection result:', result);
+                return result;
             }
-        } catch (error) {
-            console.warn('Native geolocation failed or denied. Trying IP fallbacks.');
+        } catch (error: any) {
+            console.warn('Native geolocation failed or denied:', error.message || error);
         }
     }
 
     // Secondary attempt: IP Geolocation (Silent, requires no prompt)
+    // Primary IP Provider: ipapi.co
     try {
+        console.log('Attempting primary IP fallback (ipapi.co)...');
         const ipRes = await fetch('https://ipapi.co/json/');
         const ipData = await ipRes.json();
-        
+
         if (ipData && ipData.country_code) {
             const isIndia = ipData.country_code === 'IN';
-            return {
-                country_code: ipData.country_code,
-                country_name: ipData.country_name,
-                city: ipData.city,
-                region: ipData.region,
+            const result: LocationData = {
+                country_code: ipData.country_code || 'US',
+                country_name: isIndia ? 'India' : (ipData.country_name || 'USA'),
+                city: isIndia ? undefined : ipData.city,
+                region: isIndia ? undefined : ipData.region,
                 currency: isIndia ? 'INR' : 'USD',
                 coordinates: { latitude: ipData.latitude, longitude: ipData.longitude }
             };
+            console.log('Primary IP detection result:', result);
+            return result;
         }
     } catch (ipError) {
-        console.warn('IP Fallback failed. Using ultimate defaults.', ipError);
+        console.warn('Primary IP Fallback (ipapi.co) failed. Trying secondary...');
     }
 
-    // Ultimate fallback if both Native and IP fail
+    // Tertiary attempt: Another IP Geolocation Provider (ipwho.is or similar)
+    try {
+        console.log('Attempting secondary IP fallback (ipwho.is)...');
+        const ipRes = await fetch('https://ipwho.is/');
+        const ipData = await ipRes.json();
+
+        if (ipData && ipData.success) {
+            const isIndia = ipData.country_code === 'IN';
+            const result: LocationData = {
+                country_code: ipData.country_code || 'US',
+                country_name: isIndia ? 'India' : (ipData.country || 'USA'),
+                city: isIndia ? undefined : ipData.city,
+                region: isIndia ? undefined : ipData.region,
+                currency: isIndia ? 'INR' : 'USD',
+                coordinates: { latitude: ipData.latitude, longitude: ipData.longitude }
+            };
+            console.log('Secondary IP detection result:', result);
+            return result;
+        }
+    } catch (secIpError) {
+        console.warn('Secondary IP Fallback failed. Using ultimate defaults.');
+    }
+
+    // Ultimate fallback if all attempts fail
+    console.log('All detection attempts failed. Returning USA default.');
     return {
         country_code: 'US',
-        country_name: 'United States',
+        country_name: 'USA',
         currency: 'USD'
     };
 };

@@ -107,13 +107,13 @@ export default function Home() {
 
 
                 <motion.div
-                    className="relative z-10 text-center px-4 pt-32 pb-16"
+                    className="relative z-10 text-center px-6 pt-52 md:pt-60 pb-24 md:pb-32"
                     initial="hidden"
                     animate="visible"
                     variants={staggerVariants}
                 >
 
-                    <motion.div variants={fadeUpVariant} className="relative inline-block mb-10">
+                    <motion.div variants={fadeUpVariant} className="relative inline-block mb-12">
                         {/* Sweeping Leaf Animation Wrapper */}
                         <div className="absolute -top-8 -left-4 md:-top-12 md:-left-8 pointer-events-none overflow-visible">
                             <motion.div
@@ -127,18 +127,22 @@ export default function Home() {
                             </motion.div>
                         </div>
 
-                        <h2 className="font-serif text-4xl sm:text-5xl md:text-7xl lg:text-[5rem] font-black uppercase tracking-[2px] md:tracking-[6px] mb-3 drop-shadow-2xl text-[var(--color-secondary)]">
+                        <h2 className="font-serif text-2xl sm:text-5xl md:text-7xl lg:text-[5rem] font-black uppercase tracking-[2px] md:tracking-[6px] mb-6 md:mb-8 drop-shadow-2xl text-[var(--color-secondary)] leading-tight">
                             VIDEEPTHA FOODS
                         </h2>
                         <div 
-                            className="text-3xl sm:text-4xl md:text-6xl text-[#1a202c] tracking-[-1px] mb-6 opacity-100 drop-shadow-md text-balance"
+                            className="text-lg sm:text-4xl md:text-6xl text-[#1a202c] tracking-[-1px] mb-12 md:mb-16 opacity-100 drop-shadow-md text-balance leading-tight"
                             style={{ fontFamily: 'var(--font-namaste)', textTransform: 'none' }}
                         >
                             svastam prakrtham - snehitam
                         </div>
                     </motion.div>
 
-                    <motion.p variants={fadeUpVariant} className="text-2xl sm:text-3xl md:text-4xl max-w-[950px] mx-auto mb-12 leading-relaxed font-medium text-[var(--color-text)] drop-shadow-md">
+                    <motion.p 
+                        variants={fadeUpVariant} 
+                        className="text-base sm:text-3xl md:text-5xl max-w-[1200px] mx-auto mb-16 md:mb-20 tracking-[-1px] opacity-100 drop-shadow-md text-balance text-[#a8d5a2] font-medium leading-relaxed"
+                        style={{ fontFamily: 'var(--font-namaste)', textTransform: 'none' }}
+                    >
                         Grow stronger - live healthier.<br />
                         We do bring you a powerhouse in small packets for a better today tomorrow...
                     </motion.p>
@@ -176,7 +180,7 @@ export default function Home() {
                         variants={flyInLeftVariant}
                     >
                         <h3 className="text-[var(--color-primary)] uppercase tracking-widest font-black mb-4">Our Promise</h3>
-                        <h2 className="font-serif text-4xl md:text-5xl font-black mb-8 text-[var(--color-text)]">Food Made With <span className="text-[var(--color-secondary)]">Love & Purity</span></h2>
+                        <h2 className="font-serif text-3xl md:text-5xl font-black mb-8 text-[var(--color-text)]">Food Made With <span className="text-[var(--color-secondary)]">Love & Purity</span></h2>
 
                         <p className="text-lg text-[var(--color-text)]/80 leading-relaxed mb-6">
                             Ancient Indian culture views food (Anna) not just as physical fuel, but as a divine manifestation (Brahman) directly linked to the health of the body, mind, and the spirit. The lifestyle was based on Sattva (purity), moderation, and living in harmony with nature.
@@ -238,10 +242,11 @@ export default function Home() {
                         className="flex flex-col gap-10 text-center"
                     >
                         <motion.div variants={fadeUpVariant}>
-                            <h2 className="text-5xl md:text-6xl text-[var(--color-primary)] mb-8 font-serif font-black">About Us</h2>
+                            <h2 className="text-3xl md:text-6xl text-[var(--color-primary)] mb-8 font-serif font-black">About Us</h2>
 
-                            <p className="text-2xl text-[var(--color-text)]/90 leading-relaxed mb-6">
-                                We, <strong className="text-[var(--color-secondary)] text-3xl font-black">Vidya – Pradeep</strong>, want to bring a unique blend of foods & a small healthy revolution in every kitchen.
+                            <p className="text-2xl text-[var(--color-text)]/90 leading-relaxed mb-10 px-4 md:px-0">
+                                We, <strong className="text-[var(--color-secondary)] text-3xl md:text-4xl font-black block mt-2 mb-4">Vidya – Pradeep</strong>
+                                want to bring a unique blend of foods & a small healthy revolution in every kitchen.
                             </p>
 
                             <p className="text-2xl md:text-3xl text-[var(--color-secondary)] italic font-bold mb-12">
@@ -311,7 +316,7 @@ export default function Home() {
                                 <div className="w-[280px] bg-[#FDF8F0] border border-[var(--color-border)] p-6 rounded-3xl shrink-0 hover:border-[var(--color-primary)] transition-colors shadow-sm hover:shadow-md">
                                     <Sprout size={40} className="text-[var(--color-accent)] mb-4" />
                                     <p className="text-sm text-[var(--color-text-dim)] leading-relaxed">
-                                        No <span className="font-bold text-[var(--color-secondary)]">Wheat</span> or <span className="font-bold text-[var(--color-secondary)]">Maida</span> fillers. Our millets retain their bran layer, providing maximum dietary fiber and slow-release energy.
+                                        <span className="font-bold text-[var(--color-primary)]">Millets are NOT boring!</span> Retaining their traditional bran layer for a nutritional powerhouse that gives you slow-release energy all day.
                                     </p>
                                 </div>
                                 <div className="w-[280px] bg-[#F9F0E6] border-2 border-[var(--color-secondary)] p-6 rounded-3xl shrink-0 hover:border-[var(--color-primary)] transition-all shadow-xl hover:shadow-2xl scale-105 z-10 mx-2">

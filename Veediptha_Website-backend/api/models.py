@@ -103,6 +103,7 @@ class Product(models.Model):
     category_ids = models.JSONField(default=list)
     subcategory_id = models.CharField(max_length=100, blank=True, null=True)
     attributes = models.JSONField(default=dict)
+    dropdown = models.CharField(max_length=255, blank=True, null=True)
     is_active = models.BooleanField(default=True)
 
     class Meta:
